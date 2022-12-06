@@ -45,14 +45,24 @@ const parseInput = (input) => {
 }
 
 const executeInstruction = (instruction, crateState) => {
-  console.log('Instruction move', instruction.move, 'crate(s) from stack', instruction.from, 'to stack', instruction.to)
-  console.log('CrateState pre:', crateState)
   let fromStack = crateState.get(instruction.from)
   let toStack = crateState.get(instruction.to)
   for(let i = 0; i < instruction.move; i++) {
     toStack.push(fromStack.pop())
   }
-  console.log('CrateState post:', crateState)
+}
+
+const executeInstruction9001 = (instruction, crateState) => {
+  // console.log('Instruction move', instruction.move, 'crate(s) from stack', instruction.from, 'to stack', instruction.to)
+  // console.log('CrateState pre:', crateState)
+  let fromStack = crateState.get(instruction.from)
+  let toStack = crateState.get(instruction.to)
+  let stackSlice = []
+  for(let i = 0; i < instruction.move; i++) {
+    stackSlice.push(fromStack.pop())
+  }
+  crateState.set(instruction.to, toStack.concat(stackSlice.reverse()))
+  // console.log('CrateState post:', crateState)
 }
 
 const getTopLetters = (crateState) => {
@@ -62,9 +72,16 @@ const getTopLetters = (crateState) => {
 }
 
 module.exports = (input) => {
-  const {crateState, instructions} = parseInput(input)
+  let {crateState, instructions} = parseInput(input)
   instructions.forEach(instruction => {
     executeInstruction(instruction, crateState)
   })
-  return [getTopLetters(crateState)]
+  const part1 = getTopLetters(crateState);
+
+  ({crateState, instructions} = parseInput(input))
+  instructions.forEach(instruction => {
+    executeInstruction9001(instruction, crateState)
+  })
+  const part2 = getTopLetters(crateState);
+  return [part1, part2]
 }

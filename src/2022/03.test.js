@@ -9,5 +9,5 @@ CrZsJsPPZsGzwwsLwLmpwMDw
 `
 
 test('Day 3', () => {
-  expect(solution(primer)).toEqual(157);
+  expect(solution(primer)).toEqual([157, 70]);
 });

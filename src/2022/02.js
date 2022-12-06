@@ -1,4 +1,5 @@
-const {splitClean} = require("../util/inputUtils");
+const { splitClean } = require('../util/inputUtils');
+
 const didIWin = (theirWeapon, myWeapon) => {
   let result
   if (theirWeapon === myWeapon) {
@@ -37,10 +38,7 @@ const chooseMove = (theirWeapon, desired) => {
   return result
 }
 
-
-
 module.exports = (input) => {
-  let totalScore = 0
   const oppMoves = {
     'A': {name: 'Rock'},
     'B': {name: 'Paper'},
@@ -52,7 +50,19 @@ module.exports = (input) => {
     'Z': {name: 'Scissors', score: 3, chooseResult: 'win'}
   }
 
-  splitClean(input).forEach((round, index) => {
+  const part1 = splitClean(input).map(round => {
+    const [theirs, mine] = round.split(' ')
+    const fightResult = didIWin(oppMoves[theirs].name, myMoves[mine].name)
+    let roundScore = myMoves[mine].score
+    if (fightResult === null) {
+      roundScore += 3
+    } else if (fightResult === true) {
+      roundScore += 6
+    }
+    return roundScore
+  }).reduce((a, c) => a + c)
+
+  const part2 = splitClean(input).map(round => {
     const [theirs, mine] = round.split(' ')
     const myWeapon = chooseMove(oppMoves[theirs].name, myMoves[mine].chooseResult)
     // const fightResult = didIWin(oppMoves[theirs].name, myMoves[mine].name)
@@ -64,7 +74,7 @@ module.exports = (input) => {
     } else if (fightResult === true) {
       roundScore += 6
     }
-    totalScore += roundScore
-  })
-  return totalScore
+    return roundScore
+  }).reduce((a, c) => a + c)
+  return [part1, part2]
 }

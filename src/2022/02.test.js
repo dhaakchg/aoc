@@ -5,5 +5,5 @@ C Z
 `
 
 test('Day 2', () => {
-  expect(solution(primer)).toEqual(12);
+  expect(solution(primer)).toEqual([15, 12]);
 });

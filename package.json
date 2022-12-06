@@ -10,7 +10,8 @@
   },
   "scripts": {
     "lint": "eslint .",
-    "test": "test"
+    "doit": "node ./src/index.js",
+    "test": "jest"
   },
   "devDependencies": {
     "eslint": "^8.22.0",

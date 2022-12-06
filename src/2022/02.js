@@ -38,6 +38,16 @@ const chooseMove = (theirWeapon, desired) => {
   return result
 }
 
+const scoreFight = (result) => {
+  if (result === null) {
+    return 3
+  } else if (result === true) {
+    return 6
+  } else {
+    return 0
+  }
+}
+
 module.exports = (input) => {
   const oppMoves = {
     'A': {name: 'Rock'},
@@ -54,27 +64,15 @@ module.exports = (input) => {
     const [theirs, mine] = round.split(' ')
     const fightResult = didIWin(oppMoves[theirs].name, myMoves[mine].name)
     let roundScore = myMoves[mine].score
-    if (fightResult === null) {
-      roundScore += 3
-    } else if (fightResult === true) {
-      roundScore += 6
-    }
-    return roundScore
+    return roundScore + scoreFight(fightResult)
   }).reduce((a, c) => a + c)
 
   const part2 = splitClean(input).map(round => {
     const [theirs, mine] = round.split(' ')
     const myWeapon = chooseMove(oppMoves[theirs].name, myMoves[mine].chooseResult)
-    // const fightResult = didIWin(oppMoves[theirs].name, myMoves[mine].name)
     const fightResult = didIWin(oppMoves[theirs].name, myWeapon)
-    // let roundScore = myMoves[mine].score
     let roundScore = Object.values(myMoves).filter(e => e.name === myWeapon).map(e => e.score).reduce((a, s) => a + s, 0)
-    if (fightResult === null) {
-      roundScore += 3
-    } else if (fightResult === true) {
-      roundScore += 6
-    }
-    return roundScore
+    return roundScore + scoreFight(fightResult)
   }).reduce((a, c) => a + c)
   return [part1, part2]
 }

@@ -1,4 +1,5 @@
 const {splitClean} = require("../util/inputUtils");
+const maxDirSize = 100000
 
 class DirTree {
   constructor() {
@@ -33,6 +34,18 @@ class DirTree {
   printTree() {
     console.log(this.root.toString())
   }
+
+  part1() {
+    const dirs = this.root.matchPart1()
+    return dirs.map(dir => {
+      // console.log(`dir: ${dir.name} size: ${dir.getSize()} <= ${maxDirSize}`)
+      return dir.getSize()
+    }).reduce((a, c) => a + c)
+  }
+
+  part2() {
+    return 0
+  }
 }
 
 class Dir {
@@ -40,6 +53,7 @@ class Dir {
     this.name = name
     this.parent = parent
     this.children = []
+    this.size = null
   }
 
   addChild(child) {
@@ -51,11 +65,20 @@ class Dir {
   }
 
   getSize() {
-    return this.children.map(child => child.getSize()).reduce((a, c) => a + c)
+    if(this.size === null) {
+      this.size = this.children.map(child => child.getSize()).reduce((a, c) => a + c)
+    }
+    return this.size
   }
 
   toString(indent = 0) {
     return [`${'  '.repeat(indent)}- ${this.name} (dir, size=${this.getSize()})`].concat(this.children.map(child => child.toString(indent + 1))).join('\n')
+  }
+
+  matchPart1() {
+    // this is gross.
+    let matches = this.getSize() <= maxDirSize ? [this] : []
+    return matches.concat(this.children.filter(child => child instanceof Dir).map(child => child.matchPart1())).flat()
   }
 }
 
@@ -75,12 +98,11 @@ class File {
 }
 
 module.exports = (input) => {
-  let part1 = 95437
   let part2 = 0
   const tree = new DirTree()
 
   tree.buildTree(splitClean(input))
   tree.printTree()
 
-  return [part1, part2]
+  return [tree.part1(), tree.part2()]
 }

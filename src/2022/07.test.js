@@ -24,5 +24,5 @@ $ ls
 7214296 k`
 
 test('Day 7', () => {
-  expect(solution(primer)).toEqual([95437, 0])
+  expect(solution(primer)).toEqual([95437, 24933642])
 })

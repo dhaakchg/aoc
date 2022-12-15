@@ -1,5 +1,7 @@
 const {splitClean} = require("../util/inputUtils");
 const maxDirSize = 100000
+const fileSysSize = 70000000
+const unusedReq = 30000000
 
 class DirTree {
   constructor() {
@@ -44,7 +46,13 @@ class DirTree {
   }
 
   part2() {
-    return 0
+    const totalUsed = this.root.getSize()
+    const unusedSpace = fileSysSize - totalUsed
+    const allDirs = [this.root].concat(this.root.getSubDirs())
+    // console.log('/ using:', totalUsed, 'total dirs:', allDirs.length)
+    let wouldWork = allDirs.filter(dir => unusedSpace + dir.size >= unusedReq)
+    wouldWork.sort((a, b) => a.size - b.size)
+    return wouldWork[0].size
   }
 }
 
@@ -79,6 +87,11 @@ class Dir {
     // this is gross.
     let matches = this.getSize() <= maxDirSize ? [this] : []
     return matches.concat(this.children.filter(child => child instanceof Dir).map(child => child.matchPart1())).flat()
+  }
+
+  getSubDirs() {
+    const subDirs = this.children.filter(child => child instanceof Dir)
+    return subDirs.concat(subDirs.map(sub => sub.getSubDirs())).flat()
   }
 }
 

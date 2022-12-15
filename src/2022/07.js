@@ -111,11 +111,8 @@ class File {
 }
 
 module.exports = (input) => {
-  let part2 = 0
   const tree = new DirTree()
-
   tree.buildTree(splitClean(input))
-  tree.printTree()
-
+  // tree.printTree()
   return [tree.part1(), tree.part2()]
 }

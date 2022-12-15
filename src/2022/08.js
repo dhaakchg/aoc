@@ -1,1 +1,1 @@
-module.exports = input => {}
+module.exports = input => { return [] }

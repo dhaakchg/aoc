@@ -17,9 +17,7 @@ class DirTree {
           } else if (cmd[2] === '..') {
             cwd = cwd.getParent()
           } else {
-            const newDir = new Dir(cmd[2], cwd)
-            cwd.addChild(newDir)
-            cwd = newDir
+            cwd = cwd.children.find(child => child instanceof Dir && child.name === cmd[2])
           }
         }
       } else {
@@ -33,10 +31,7 @@ class DirTree {
   }
 
   printTree() {
-    this.root.children.forEach(child => {
-
-    })
-
+    console.log(this.root.toString())
   }
 }
 
@@ -58,6 +53,10 @@ class Dir {
   getSize() {
     return this.children.map(child => child.getSize()).reduce((a, c) => a + c)
   }
+
+  toString(indent = 0) {
+    return [`${'  '.repeat(indent)}- ${this.name} (dir, size=${this.getSize()})`].concat(this.children.map(child => child.toString(indent + 1))).join('\n')
+  }
 }
 
 class File {
@@ -69,6 +68,10 @@ class File {
   getSize() {
     return this.size
   }
+
+  toString(indent) {
+    return `${'  '.repeat(indent)}- ${this.name} (file, size=${this.size})`;
+  }
 }
 
 module.exports = (input) => {
@@ -77,8 +80,7 @@ module.exports = (input) => {
   const tree = new DirTree()
 
   tree.buildTree(splitClean(input))
-
-  console.log(JSON.stringify(tree))
+  tree.printTree()
 
   return [part1, part2]
 }

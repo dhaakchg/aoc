@@ -115,7 +115,7 @@ class TreeGrid {
       }
       scoreGrid.push(rs.join(''))
     }
-    console.log(scoreGrid.join('\n'))
+    // console.log(scoreGrid.join('\n'))
     return bestScenic
   }
 

@@ -14,11 +14,11 @@ class TreeGrid {
     return {
       row: {
         index: r,
-        slice: this.grid[r]
+        rslice: this.grid[r]
       },
       col: {
         index: c,
-        slice: this.grid.map(gr => gr[c])
+        cslice: this.grid.map(gr => gr[c])
       }
     }
   }
@@ -39,31 +39,33 @@ class TreeGrid {
     return p.join('\n')
   }
 
-  treeVisible(tp, treeSlice) {
+  treeVisible(tx) {
     let visible = false
-    if(tp === 0 || tp === treeSlice.length - 1) {
+    const treeHeight = this.grid[tx.row.index][tx.col.index]
+    if((tx.row.index === 0 || tx.row.index === tx.row.rslice.length - 1) ||
+      (tx.col.index === 0 || tx.col.index === tx.col.cslice.length - 1)) {
       visible = true
     } else {
-      const left = treeSlice.slice(0, tp)
-      const right = treeSlice.slice(tp + 1, treeSlice.length).reverse()
-      const treeHeight = treeSlice[tp]
-      if(left.filter(t => t < treeHeight).length === left.length && right.filter(t => t < treeHeight).length === right.length) {
-        visible = true
-      }
+      const left = tx.row.rslice.slice(0, tx.col.index)
+      const right = tx.row.rslice.slice(tx.col.index + 1, tx.row.rslice.length).reverse()
+      const top = tx.col.cslice.slice(0, tx.row.index)
+      const bottom = tx.col.cslice.slice(tx.row.index + 1, tx.col.cslice.length).reverse()
+      // console.log(`Checking Tree at pos: [${tx.row.index}][${tx.col.index}] height: ${treeHeight}\n${this.printTreeSlices(tx)}`)
+      visible = [left, right, top, bottom].filter(chunk => {
+        return chunk.filter(th => th < treeHeight).length === chunk.length
+      }).length > 0
+      // console.log(`left: ${left} right: ${right} top: ${top} bottom: ${bottom} -> visible: ${visible}`);
     }
-    console.log(`Tree pos: ${tp}, slice: ${treeSlice} visible: ${visible}`)
     return visible
   }
 
   countVisible() {
     // let visible = (this.rows * 2) + ((this.columns - 2) * 2)
     let visible = 0
-    for(let row = 1; row < this.rows - 1; row++ ) { // skip perimeter
-      for(let col = 1; col < this.columns - 1; col++ ) { // skip perimeter
+    for(let row = 0; row < this.rows; row++ ) {
+      for(let col = 0; col < this.columns; col++ ) {
         const treeX = this.getTreeSlices(row, col)
-        console.log(`Checking tree [${row}][${col}]`)
-        console.log(this.printTreeSlices(treeX))
-        if(this.treeVisible(row, treeX.row.slice) || this.treeVisible(col, treeX.col.slice)) {
+        if(this.treeVisible(treeX)) {
           visible += 1
         }
       }
@@ -78,6 +80,5 @@ class TreeGrid {
 
 module.exports = input => {
   const trees = new TreeGrid(splitClean(input))
-  console.log(trees)
-  return trees.countVisible()
+  return [trees.countVisible(), 0]
 }

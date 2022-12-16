@@ -6,5 +6,5 @@ const primer = `30373
 35390`
 
 test('Day 8', () => {
-  expect(solution(primer)).toEqual([21, 0])
+  expect(solution(primer)).toEqual([21, 8])
 })

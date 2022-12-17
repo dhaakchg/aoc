@@ -42,6 +42,21 @@ class SimpleCpu {
     const interestingSignals = [this.INITIAL_CYCLE].concat(range(60, 220, this.SIGNAL_CYCLE))
     return interestingSignals.map(cycle => this.signal[cycle - 1] * cycle).reduce((a, c) => a + c)
   }
+
+  crt() {
+    let display = []
+    let crtRow = []
+    this.signal.forEach((spritePos, cycle) => {
+      let currentPixel = cycle % 40
+      const drawPixel = Math.abs(currentPixel - spritePos) <= 1
+      crtRow.push(drawPixel ? '#' : '.')
+      if((cycle + 1) % this.SIGNAL_CYCLE === 0) {
+        display.push(crtRow.join(''))
+        crtRow = []
+      }
+    })
+    return display.join('\n')
+  }
 }
 
 module.exports = SimpleCpu

@@ -27,13 +27,18 @@ const getMoves = input => {
 
 const applyMove = (move, head, tail) => {
   const dh = [head[0] + move[0], head[1] + move[1]]
-  const dht = [dh[0] - tail[0], dh[1] - tail[1]]
-  let dt = [tail[0], tail[1]]
-  if(Math.abs(dht[0]) > 1) {
-    dt[0] += Math.sign(dht[0])
-  }
-  if(Math.abs(dht[1]) > 1) {
-    dt[1] += Math.sign(dht[1])
+  const dx = dh[0] - tail[0]
+  const dy = dh[1] - tail[1]
+  let dt = [tail[0], tail[1]] // current tail
+  if(Math.abs(dx) > 1 || Math.abs(dy) > 1) {
+    if(dx === 0) {
+      dt[1] += Math.floor(dy / 2)
+    } else if(dy === 0) {
+      dt[0] += Math.floor(dx / 2)
+    } else {
+        dt[0] += Math.sign(dx)
+        dt[1] += Math.sign(dy)
+    }
   }
   console.log(`Move: ${move}\n\tHead: ${head} -> ${dh}\n\tTail: ${tail} -> ${dt}`)
   return [dh, dt]
@@ -56,6 +61,5 @@ const moveRope = (ropeLength, moves) => {
 
 module.exports = input => {
   const ropeMoves = getMoves(splitClean(input))
-  moveRope(2, ropeMoves)
-  return /R 4/.test(ropeMoves[0]) ? [ 13, 1 ] : [ 88, 36]
+  return moveRope(2, ropeMoves)
 }

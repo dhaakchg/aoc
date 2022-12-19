@@ -25,41 +25,45 @@ const getMoves = input => {
   return moves
 }
 
-const applyMove = (move, head, tail) => {
-  const dh = [head[0] + move[0], head[1] + move[1]]
-  const dx = dh[0] - tail[0]
-  const dy = dh[1] - tail[1]
-  let dt = [tail[0], tail[1]] // current tail
-  if(Math.abs(dx) > 1 || Math.abs(dy) > 1) {
-    if(dx === 0) {
-      dt[1] += Math.floor(dy / 2)
-    } else if(dy === 0) {
-      dt[0] += Math.floor(dx / 2)
-    } else {
-        dt[0] += Math.sign(dx)
-        dt[1] += Math.sign(dy)
+const applyMove = (move, rope) => {
+  rope[0][0] += move[0]
+  rope[0][1] += move[1]
+
+  for(let i = 0; i < rope.length - 1; i++){
+    const head = rope[i]
+    const tail = rope[i + 1]
+    const dx = head[0] - tail[0]
+    const dy = head[1] - tail[1]
+    if(Math.abs(dx) > 1 || Math.abs(dy) > 1) {
+      if(dx === 0) {
+        tail[1] += Math.floor(dy / 2)
+      } else if(dy === 0) {
+        tail[0] += Math.floor(dx / 2)
+      } else {
+        tail[0] += Math.sign(dx)
+        tail[1] += Math.sign(dy)
+      }
     }
   }
-  console.log(`Move: ${move}\n\tHead: ${head} -> ${dh}\n\tTail: ${tail} -> ${dt}`)
-  return [dh, dt]
 }
 
 const moveRope = (ropeLength, moves) => {
-  let head = [0, 0]
-  let tail = [0, 0]
-  let tailLocations = [tail]
+  let rope = []
+  range(1, Number.parseInt(ropeLength)).forEach(_ => rope.push([0,0])) // make rope at 0,0
+  let tloc = []
   moves.forEach(move => {
-    const deltas = applyMove(move, head, tail)
-    head = deltas[0]
-    tail = deltas[1]
-    tailLocations.push(tail)
+    applyMove(move, rope)
+    let tpos = []
+    Object.assign(tpos, rope[ropeLength - 1])
+    tloc.push(tpos)
+    // console.log("Move:", move, "Rope =>", rope, "Tail Loc:", tloc)
   })
-  const tailSet = new Set(tailLocations.map(loc => loc.join(',')))
-  console.log(tailSet, tailSet.size)
-  return tailSet.size
+  const tset = new Set(tloc.map(loc => loc.join(',')))
+  console.log(tset, tset.size)
+  return tset.size
 }
 
 module.exports = input => {
   const ropeMoves = getMoves(splitClean(input))
-  return moveRope(2, ropeMoves)
+  return [moveRope(2, ropeMoves), moveRope(10, ropeMoves)]
 }

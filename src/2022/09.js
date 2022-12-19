@@ -59,7 +59,6 @@ const moveRope = (ropeLength, moves) => {
     // console.log("Move:", move, "Rope =>", rope, "Tail Loc:", tloc)
   })
   const tset = new Set(tloc.map(loc => loc.join(',')))
-  console.log(tset, tset.size)
   return tset.size
 }
 

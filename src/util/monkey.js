@@ -26,18 +26,18 @@ class Monkey {
   }
 
   parseStartItems(line) {
-    return line.match(RE.startItems).groups.items.split(',').map(item => Number.parseInt(item.trim()))
+    return line.match(RE.startItems).groups.items.split(',').map(item => BigInt(item.trim()))
   }
 
   parseOperation(line) {
     const operation = line.match(RE.operation).groups.op
     let pieces = operation.split(' ')
-    return {lhs: pieces[2], operator: pieces[3], rhs: Number.parseInt(pieces[4])}
+    return {lhs: pieces[2], operator: pieces[3], rhs: isNaN(Number.parseInt(pieces[4])) ? 'old' : BigInt(pieces[4])}
   }
 
   parseTest(line) {
     const {testOp, testNum} = line.match(RE.test).groups
-    return {testOp, testNum}
+    return {testOp, testNum: BigInt(testNum)}
   }
 
   parseTestIf(lines) {
@@ -53,7 +53,7 @@ class Monkey {
     this.currentItems.push(item)
   }
 
-  turn() {
+  turn(relief) {
     let turnResult = {log: [`Monkey ${this.id}:`], transfer: []}
     this.currentItems.forEach(item => {
       turnResult.log.push(`  Monkey inspects an item with a worry level of ${item}.`)
@@ -61,29 +61,31 @@ class Monkey {
       let worryOp = ''
       switch (this.op.operator) {
         case '*':
-          worryLevel *= isNaN(this.op.rhs) ? worryLevel : this.op.rhs
+          worryLevel *= this.op.rhs === 'old' ? worryLevel : this.op.rhs
           worryOp = 'is multiplied'
           break
         case '+':
-          worryLevel += isNaN(this.op.rhs) ? worryLevel : this.op.rhs
+          worryLevel += this.op.rhs === 'old' ? worryLevel : this.op.rhs
           worryOp = 'increases'
           break
         case '-':
-          worryLevel -= isNaN(this.op.rhs) ? worryLevel : this.op.rhs
+          worryLevel -= this.op.rhs === 'old' ? worryLevel : this.op.rhs
           worryOp = 'decreases'
           break
         case '/':
-          worryLevel /= isNaN(this.op.rhs) ? worryLevel : this.op.rhs
+          worryLevel /= this.op.rhs === 'old' ? worryLevel : this.op.rhs
           worryOp = 'is divided'
           break
       }
-      turnResult.log.push(`    Worry level ${worryOp} by ${isNaN(this.op.rhs) ? item : this.op.rhs} to ${worryLevel}.`)
-      worryLevel = Math.floor(worryLevel / 3)
-      turnResult.log.push(`    Monkey gets bored with item. Worry level is divided by 3 to ${worryLevel}.`)
+      turnResult.log.push(`    Worry level ${worryOp} by ${this.op.rhs === 'old' ? item : this.op.rhs} to ${worryLevel}.`)
+      if(relief) {
+        worryLevel = worryLevel / 3n
+        turnResult.log.push(`    Monkey gets bored with item. Worry level is divided by 3 to ${worryLevel}.`)
+      }
       let testResult = false
       switch (this.test.testOp) {
         case 'divisible':
-          testResult = worryLevel % this.test.testNum === 0
+          testResult = worryLevel % this.test.testNum === 0n
           break
       }
       turnResult.log.push(`    Current worry level is${testResult ? ' ' : ' not '}${this.test.testOp} by ${this.test.testNum}.`)

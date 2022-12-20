@@ -28,5 +28,5 @@ Monkey 3:
     If false: throw to monkey 1`
 
 test('Day 11', () => {
-  expect(solution(primer)).toEqual([10605, 'p2'])
+  expect(solution(primer)).toEqual([10605, 2713310158])
 })

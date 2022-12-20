@@ -9,6 +9,7 @@ const RE = {
 class Monkey {
   constructor(monkeyDescriptor) {
     this.parse(monkeyDescriptor.trim())
+    this.product = 0n
     this.monkeyBusiness = 0
   }
 
@@ -55,7 +56,8 @@ class Monkey {
 
   turn(relief) {
     let turnResult = {log: [`Monkey ${this.id}:`], transfer: []}
-    this.currentItems.forEach(item => {
+    while(this.currentItems.length) {
+      const item = this.currentItems.shift()
       turnResult.log.push(`  Monkey inspects an item with a worry level of ${item}.`)
       let worryLevel = item
       let worryOp = ''
@@ -81,6 +83,8 @@ class Monkey {
       if(relief) {
         worryLevel = worryLevel / 3n
         turnResult.log.push(`    Monkey gets bored with item. Worry level is divided by 3 to ${worryLevel}.`)
+      } else {
+        worryLevel = worryLevel % this.product
       }
       let testResult = false
       switch (this.test.testOp) {
@@ -93,8 +97,7 @@ class Monkey {
       turnResult.transfer.push({targetMonkey, worryLevel})
       turnResult.log.push(`    Item with worry level ${worryLevel} is thrown to monkey ${targetMonkey}.`)
       this.monkeyBusiness += 1
-    })
-    this.currentItems = []
+    }
     return turnResult
   }
 }

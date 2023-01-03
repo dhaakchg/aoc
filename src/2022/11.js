@@ -19,11 +19,11 @@ module.exports = (input, rndCound) => {
     if([1].concat(range(10, 90, 10)).concat(range(100, 900, 100)).concat(range(1000, 10000, 1000)).includes(round)) {
       const roundResult = [`After round ${round}, the monkeys are holding items with these worry levels:`]
       monkeys.forEach(monkey => roundResult.push(`Monkey ${monkey.id}: ${monkey.currentItems}`))
-      console.log(roundResult.join('\n'))
-      console.log(`== After round ${round} ==\n${monkeys.map(m => `Monkey ${m.id} inspected items ${m.monkeyBusiness} times`).join('\n')}`)
+      // console.log(roundResult.join('\n'))
+      // console.log(`== After round ${round} ==\n${monkeys.map(m => `Monkey ${m.id} inspected items ${m.monkeyBusiness} times`).join('\n')}`)
     }
   })
   const totalMonkeyBusiness = monkeys.map(monkey => monkey.monkeyBusiness).sort((a, b) => b - a).slice(0,2).reduce((a, n) => a * n)
-  console.log(`Total monkey business: ${totalMonkeyBusiness} after ${rndCound} rounds`)
+  // console.log(`Total monkey business: ${totalMonkeyBusiness} after ${rndCound} rounds`)
   return totalMonkeyBusiness
 }

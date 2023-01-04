@@ -1,7 +1,5 @@
 const {splitClean} = require('../util/inputUtils');
-const { range } = require('../util/helpers')
-const alphabet = 'abcdefghijklmnopqrstuvwxyz'
-
+const { range, alphabet } = require('../util/helpers')
 const getPriority = (char) => /[a-z]/.test(char) ? alphabet.indexOf(char) + 1 : alphabet.toUpperCase().indexOf(char) + 27
 
 module.exports = (input) => {

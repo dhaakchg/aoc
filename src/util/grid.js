@@ -18,8 +18,13 @@ class Grid {
     return (row * this.cols) + col
   }
 
-  getGridVal(row, col) {
+  get(row, col) {
     return this.grid[this.get1dIndex(row, col)]
+  }
+
+  set(row, col, value) {
+    // console.log(`Setting grid[${row}][${col}] -> ${value}`)
+    this.grid[this.get1dIndex(row, col)] = value
   }
 
   findValue(value) {
@@ -27,10 +32,27 @@ class Grid {
     return {row: Math.floor(index/ this.cols), col: index % this.cols}
   }
 
-  toString(){
-    return range(0, this.rows).map(i => {
-      return this.grid.slice(i * this.cols, (i * this.cols) + this.cols).join('')
+  toString() {
+    return range(0, this.rows - 1).map(r => {
+      return this.grid.slice(r * this.cols, (r * this.cols) + this.cols).join('')
     }).join('\n')
+  }
+
+  drawLine(start, end, lineChar) {
+    const [sr, sc] = start
+    const [er, ec] = end
+    // Draw vertical line
+    if(sc === ec) {
+      const rowRange = sr <= er ? range(sr, er) : range(er, sr) // in case coordinates are backwards
+      console.log(`Drawing vertical line from ${start} -> ${end} with range ${rowRange}`)
+      rowRange.forEach(r => this.set(r, sc, lineChar))
+    }
+    // Draw horizontal line
+    if(sr === er) {
+      const rowRange = sc <= ec ? range(sc, ec) : range(ec, sc) // in case coordinates are backwards
+      console.log(`Drawing horizontal line from ${start} -> ${end} with range ${rowRange}`)
+      rowRange.forEach(c => this.set(sr, c, lineChar))
+    }
   }
 }
 

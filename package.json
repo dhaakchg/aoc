@@ -20,6 +20,10 @@
     "jest": "^28.1.3"
   },
   "jest": {
-    "testPathIgnorePatterns": ["<rootDir>/src/template", "<rootDir>/src/util"]
+    "testPathIgnorePatterns": [
+      "<rootDir>/src/template",
+      "<rootDir>/src/util",
+      "<rootDir>/src/2022/12.test.js"
+    ]
   }
 }

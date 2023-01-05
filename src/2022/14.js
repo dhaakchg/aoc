@@ -3,6 +3,7 @@ const {range} = require("../util/helpers");
 const Grid = require("../util/grid")
 
 let SAND_SOURCE = [0, 500]
+let SOURCE_OFFSET = 0
 const rockLines = (raw) => {
     return splitClean(raw)
         .map(line => line.split(' -> ')
@@ -23,37 +24,40 @@ const findGridBounds = (rockLines) => {
         bounds.ymin = lymin < bounds.ymin ? lymin : bounds.ymin
         bounds.ymax = lymax > bounds.ymax ? lymax : bounds.xmax
     })
-    return {
-        ...bounds,
-        rows: range(bounds.ymin, bounds.ymax).length,
-        cols: range(bounds.xmin, bounds.xmax).length,
-        xOffset: bounds.xmin
-    }
+    console.log('Grid bounds:', bounds)
+    return bounds
 }
 
-const initRockGrid = (rawInput) => {
+const initRockGrid = (rawInput, addFloor= false) => {
     const rlines = rockLines(rawInput)
-    const {rows, cols, xOffset} = findGridBounds(rlines)
+    let {xmin, xmax, ymin, ymax} = findGridBounds(rlines)
+    if(addFloor) {
+        ymax += 2
+        xmin += (SAND_SOURCE[1] - ymax) - xmin
+        xmax += (SAND_SOURCE[1] + ymax) - xmax
+    }
+    const rows = range(ymin, ymax).length
+    const cols = range(xmin, xmax).length
+    SOURCE_OFFSET = xmin
     const grid = new Grid({rows, cols})
+    console.log(`xmin: ${xmin} xmax: ${xmax} ymin: ${ymin} ymax: ${ymax} offset: ${SOURCE_OFFSET}`)
     rlines.forEach(rl => {
         for(let i = 0; i < rl.length - 1; i++) {
-            const start = rockToRowCol(rl[i], xOffset)
-            const end = rockToRowCol(rl[i+1], xOffset)
+            const start = rockToRowCol(rl[i], SOURCE_OFFSET)
+            const end = rockToRowCol(rl[i+1], SOURCE_OFFSET)
             grid.drawLine(start, end, '#')
         }
     })
-    SAND_SOURCE[1] -= xOffset
-    grid.set(SAND_SOURCE[0], SAND_SOURCE[1], '+')
+    if(addFloor) {
+        grid.drawLine(rockToRowCol([xmin, ymax], SOURCE_OFFSET), rockToRowCol([xmax, ymax], SOURCE_OFFSET), '#')
+    }
+    grid.set(SAND_SOURCE[0], SAND_SOURCE[1] - SOURCE_OFFSET, '+')
     return grid
-}
-
-const moveSand = (sand) => {
-
 }
 
 const dropSand = (grid) => {
     try {
-        let sand = [SAND_SOURCE[0], SAND_SOURCE[1]]
+        let sand = [SAND_SOURCE[0], SAND_SOURCE[1] - SOURCE_OFFSET]
         let sandAtRest = false
         do {
             const prev = [...sand]
@@ -67,11 +71,14 @@ const dropSand = (grid) => {
                 sand[1] += 1
             } else {
                 sandAtRest = true
-            }
-            if (sand !== prev) {
-                // moved
-                grid.set(prev[0], prev[1], '.')
-                grid.set(sand[0], sand[1], 'o')
+                if(sand[0] === SAND_SOURCE[0] && sand[1] === SAND_SOURCE[1] - SOURCE_OFFSET) {
+                    console.log(`Sand stopped at source!`)
+                    return false
+                } else {
+                    // moved
+                    grid.set(prev[0], prev[1], '.')
+                    grid.set(sand[0], sand[1], 'o')
+                }
             }
             // console.log(`${grid}`)
         } while (!sandAtRest)
@@ -83,11 +90,18 @@ const dropSand = (grid) => {
 }
 
 module.exports = (input) => {
-    const grid = initRockGrid(input)
-    let grains = 0
-    while(dropSand(grid)) {
-        grains += 1
+    const grid1 = initRockGrid(input)
+    let grains1 = 0
+    while(dropSand(grid1)) {
+        grains1 += 1
     }
-    console.log(`${grid}`)
-    return [grains, 100]
+    console.log(`Grains: ${grains1}\n${grid1}`)
+
+    const grid2 = initRockGrid(input, true)
+    let grains2 = 0
+    while(dropSand(grid2)) {
+        grains2 += 1
+    }
+    // console.log(`Grains: ${grains2}\n${grid2}`)
+    return [grains1, grains2]
 }

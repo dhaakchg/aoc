@@ -2,7 +2,7 @@ const {splitClean} = require("../util/inputUtils");
 const {range} = require("../util/helpers");
 const Grid = require("../util/grid")
 
-const SAND_SOURCE = [500, 0]
+let SAND_SOURCE = [0, 500]
 const rockLines = (raw) => {
     return splitClean(raw)
         .map(line => line.split(' -> ')
@@ -31,8 +31,8 @@ const findGridBounds = (rockLines) => {
     }
 }
 
-module.exports = (input) => {
-    const rlines = rockLines(input)
+const initRockGrid = (rawInput) => {
+    const rlines = rockLines(rawInput)
     const {rows, cols, xOffset} = findGridBounds(rlines)
     const grid = new Grid({rows, cols})
     rlines.forEach(rl => {
@@ -40,9 +40,54 @@ module.exports = (input) => {
             const start = rockToRowCol(rl[i], xOffset)
             const end = rockToRowCol(rl[i+1], xOffset)
             grid.drawLine(start, end, '#')
-            console.log(`${grid}`)
         }
     })
-    console.log(rlines, `\n${grid}`)
-    return [24, 100]
+    SAND_SOURCE[1] -= xOffset
+    grid.set(SAND_SOURCE[0], SAND_SOURCE[1], '+')
+    return grid
+}
+
+const moveSand = (sand) => {
+
+}
+
+const dropSand = (grid) => {
+    try {
+        let sand = [SAND_SOURCE[0], SAND_SOURCE[1]]
+        let sandAtRest = false
+        do {
+            const prev = [...sand]
+            if (grid.get(sand[0] + 1, sand[1]) === '.') { // Try and go down
+                sand[0] += 1
+            } else if (grid.get(sand[0] + 1, sand[1] - 1) === '.') { // Try and go left
+                sand[0] += 1
+                sand[1] += -1
+            } else if (grid.get(sand[0] + 1, sand[1] + 1) === '.') { // Try and go right
+                sand[0] += 1
+                sand[1] += 1
+            } else {
+                sandAtRest = true
+            }
+            if (sand !== prev) {
+                // moved
+                grid.set(prev[0], prev[1], '.')
+                grid.set(sand[0], sand[1], 'o')
+            }
+            // console.log(`${grid}`)
+        } while (!sandAtRest)
+        return true
+    } catch (e) {
+        console.log(`Caught ${e}, sand must be falling into the abyss out of bounds now`)
+        return false
+    }
+}
+
+module.exports = (input) => {
+    const grid = initRockGrid(input)
+    let grains = 0
+    while(dropSand(grid)) {
+        grains += 1
+    }
+    console.log(`${grid}`)
+    return [grains, 100]
 }

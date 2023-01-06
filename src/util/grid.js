@@ -15,7 +15,7 @@ class Grid {
   }
 
   getIndex(row, col) {
-    if((0 <= row && row < this.rows) && (col <= col && col < this.cols)) {
+    if((0 <= row && row < this.rows) && (0 <= col && col < this.cols)) {
       return (row * this.cols) + col
     } else {
       throw new Error(`Index out of Bounds for: [${row}][${col}]`)

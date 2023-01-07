@@ -40,7 +40,7 @@ console.log('Day 11: ', [day11(getRawInput(2022, 11), 20), day11(getRawInput(202
 // console.log('Day 12: ', day12(getRawInput(2022, 12)))
 console.log('Day 13: ', day13(getRawInput(2022, 13)))
 console.log('Day 14: ', day14(getRawInput(2022, 14)))
-console.log('Day 15: ', day15(getRawInput(2022, 15)))
+console.log('Day 15: ', day15(getRawInput(2022, 15), 2000000))
 // console.log('Day 16: ', day16(getRawInput(2022, 16)))
 // console.log('Day 17: ', day17(getRawInput(2022, 17)))
 // console.log('Day 18: ', day18(getRawInput(2022, 18)))

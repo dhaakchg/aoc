@@ -19,7 +19,16 @@ class Sensor extends Device {
         super(x, y);
         this.cb = cb
         this.bd = Math.abs(this.x - cb.x) + Math.abs(this.y - cb.y) // Beacon Distance
-        this.diamond = this.getBeaconDiamond()
+        // this.diamond = this.getBeaconDiamond()
+    }
+
+    rangeY(y) {
+        return (this.y - this.bd) <= y <= (this.y + this.bd)
+    }
+
+    rangeX(y) {
+        const xr = Math.abs(Math.abs(this.y - y) - this.bd)
+        return [this.x - xr, this.x + xr]
     }
 
     getBeaconDiamond() {
@@ -34,8 +43,8 @@ class Sensor extends Device {
 
 const aggregateSensors = (sensors, y) => {
     let positions = []
-    sensors.filter(sensor => sensor.diamond.has(y)).forEach(sensor => {
-        const [sxmin, sxmax] = sensor.diamond.get(y)
+    sensors.filter(sensor => sensor.rangeY(y)).forEach(sensor => {
+        const [sxmin, sxmax] = sensor.rangeX(y)
         positions.push(sxmin, sxmax)
     })
     let rangeMin = Math.min(...positions)

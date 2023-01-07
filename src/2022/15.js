@@ -24,22 +24,24 @@ class Sensor extends Device {
 
     getBeaconDiamond() {
         const diamond = new Map()
-        range(this.y - this.bd, this.y + this.bd).forEach(row => {
+        for(let row = this.y - this.bd; row <= this.y + this.bd; row++) {
             const xr = Math.abs(Math.abs(this.y - row) - this.bd)
-            diamond.set(row, new Set(range(this.x - xr, this.x + xr)))
-        })
+            diamond.set(row, [this.x - xr, this.x + xr])
+        }
         return diamond
     }
 }
 
 const aggregateSensors = (sensors, y) => {
-    let positions = new Set()
+    let positions = []
     sensors.filter(sensor => sensor.diamond.has(y)).forEach(sensor => {
-        sensor.diamond.get(y).forEach(v => positions.add(v))
+        const [sxmin, sxmax] = sensor.diamond.get(y)
+        positions.push(sxmin, sxmax)
     })
-    let beaconPositions = sensors.filter(sensor => sensor.cb.y === y).map(sensor => sensor.cb.x)
-    beaconPositions.forEach(b => positions.delete(b))
-    return positions
+    let rangeMin = Math.min(...positions)
+    let rangeMax = Math.max(...positions)
+    let beaconPositions = new Set(sensors.filter(sensor => sensor.cb.y === y).map(sensor => sensor.cb.x))
+    return (rangeMax - rangeMin) + 1 - beaconPositions.size
 }
 
 const parse = (raw) => {
@@ -57,6 +59,5 @@ const parse = (raw) => {
 module.exports = (input, yPos) => {
     const sensors = parse(input)
     const dmz = aggregateSensors(sensors, yPos)
-    console.log(Array.from(dmz).sort((a, b) => a - b))
-    return [dmz.size, 'part2']
+    return [dmz, 'part2']
 }

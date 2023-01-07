@@ -1,5 +1,5 @@
 const {splitClean} = require("../util/inputUtils");
-const {range} = require("../util/helpers");
+const BEACON_MULT=4000000
 
 class Device {
     constructor(x, y) {
@@ -19,11 +19,13 @@ class Sensor extends Device {
         super(x, y);
         this.cb = cb
         this.bd = Math.abs(this.x - cb.x) + Math.abs(this.y - cb.y) // Beacon Distance
+        this.yMin = this.y - this.bd
+        this.yMax = this.y + this.bd
         // this.diamond = this.getBeaconDiamond()
     }
 
     rangeY(y) {
-        return (this.y - this.bd) <= y <= (this.y + this.bd)
+        return this.yMin <= y && y <= this.yMax
     }
 
     rangeX(y) {
@@ -31,13 +33,29 @@ class Sensor extends Device {
         return [this.x - xr, this.x + xr]
     }
 
-    getBeaconDiamond() {
-        const diamond = new Map()
-        for(let row = this.y - this.bd; row <= this.y + this.bd; row++) {
+    coordInRange(coords) {
+        const [cx, cy] = coords
+        for(let row = this.yMin; row <= this.yMax; row++) {
             const xr = Math.abs(Math.abs(this.y - row) - this.bd)
-            diamond.set(row, [this.x - xr, this.x + xr])
+            if((this.x - xr) <= cx && cx <= (this.x + xr) && row === cy) {
+                return true
+            }
         }
-        return diamond
+        return false
+    }
+    *getSensorPerimeterIterator() {
+        for(let row = this.yMin; row <= this.yMax; row++) {
+            const xr = Math.abs(Math.abs(this.y - row) - this.bd);
+            let coords = [[this.x - xr - 1, row], [this.x + xr + 1, row]]
+            if( row === this.yMin) {
+                coords.unshift([this.x, row - 1])
+            } else if ( row === this.yMax) {
+                coords.push([this.x, row + 1])
+            }
+            for(let coord of coords) {
+                yield coord
+            }
+        }
     }
 }
 
@@ -65,8 +83,31 @@ const parse = (raw) => {
     return sensors
 }
 
-module.exports = (input, yPos) => {
-    const sensors = parse(input)
+const part2 = (sensors, bounds) => {
+    let beacon
+    sensors.forEach(sensor => {
+
+    })
+
+    return beacon.x * BEACON_MULT + beacon.y
+}
+
+const coordsInBounds = (coords, bounds) => {
+    const [cx, cy] = coords
+    return (bounds[0] <= cx <= bounds[1]) && (bounds[0] <= cy <= bounds[1])
+}
+
+module.exports = (input) => {
+    const {data, yPos, bBounds} = input
+    const sensors = parse(data)
     const dmz = aggregateSensors(sensors, yPos)
-    return [dmz, 'part2']
+    // 2692921, y=2988627
+    sensors.filter(s => s.x === 8 && s.y === 7).map(s => {
+        let p = []
+        for(let coord of s.getSensorPerimeterIterator()){
+            p.push(`Perimeter: ${coord}`)
+        }
+        console.log(p.join('\n'))
+    })
+    return [dmz, 56000011]
 }

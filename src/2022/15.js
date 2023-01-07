@@ -84,30 +84,28 @@ const parse = (raw) => {
 }
 
 const part2 = (sensors, bounds) => {
-    let beacon
-    sensors.forEach(sensor => {
-
-    })
-
-    return beacon.x * BEACON_MULT + beacon.y
+    for(let sensor of sensors) {
+        for(let coord of sensor.getSensorPerimeterIterator()) {
+            if(coordsInBounds(coord, bounds)) {
+                const coordNotInSensorRange = sensors.filter(checkRangeSensor => checkRangeSensor.coordInRange(coord)).length === 0
+                if(coordNotInSensorRange) {
+                    console.log(`Perimeter coord: ${coord} within bounds: ${bounds} and not in any sensor range`)
+                    return coord[0] * BEACON_MULT + coord[1]
+                }
+            }
+        }
+    }
 }
 
 const coordsInBounds = (coords, bounds) => {
     const [cx, cy] = coords
-    return (bounds[0] <= cx <= bounds[1]) && (bounds[0] <= cy <= bounds[1])
+    return (bounds[0] <= cx && cx <= bounds[1]) && (bounds[0] <= cy && cy <= bounds[1])
 }
 
 module.exports = (input) => {
     const {data, yPos, bBounds} = input
     const sensors = parse(data)
     const dmz = aggregateSensors(sensors, yPos)
-    // 2692921, y=2988627
-    sensors.filter(s => s.x === 8 && s.y === 7).map(s => {
-        let p = []
-        for(let coord of s.getSensorPerimeterIterator()){
-            p.push(`Perimeter: ${coord}`)
-        }
-        console.log(p.join('\n'))
-    })
-    return [dmz, 56000011]
+    const distressBeaconFreq = part2(sensors, bBounds)
+    return [dmz, distressBeaconFreq]
 }

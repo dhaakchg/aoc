@@ -18,12 +18,15 @@ class Sensor extends Device {
     constructor(x, y, cb) {
         super(x, y);
         this.cb = cb
-        this.bd = Math.abs(this.x - cb.x) + Math.abs(this.y - cb.y) // Beacon Distance
+        this.bd = this.manhattan([this.x, this.y], [cb.x, cb.y]) // Beacon Distance
         this.yMin = this.y - this.bd
         this.yMax = this.y + this.bd
         // this.diamond = this.getBeaconDiamond()
     }
 
+    manhattan(coord1, coord2) {
+        return Math.abs(coord1[0] - coord2[0]) + Math.abs(coord1[1] - coord2[1])
+    }
     rangeY(y) {
         return this.yMin <= y && y <= this.yMax
     }
@@ -34,14 +37,7 @@ class Sensor extends Device {
     }
 
     coordInRange(coords) {
-        const [cx, cy] = coords
-        for(let row = this.yMin; row <= this.yMax; row++) {
-            const xr = Math.abs(Math.abs(this.y - row) - this.bd)
-            if((this.x - xr) <= cx && cx <= (this.x + xr) && row === cy) {
-                return true
-            }
-        }
-        return false
+        return this.manhattan([this.x, this.y], [coords[0], coords[1]]) <= this.bd
     }
     *getSensorPerimeterIterator() {
         for(let row = this.yMin; row <= this.yMax; row++) {
@@ -85,9 +81,13 @@ const parse = (raw) => {
 
 const part2 = (sensors, bounds) => {
     for(let sensor of sensors) {
+        console.log(`Checking perimeter of sensor at x=${sensor.x},y=${sensor.y}`)
         for(let coord of sensor.getSensorPerimeterIterator()) {
             if(coordsInBounds(coord, bounds)) {
-                const coordNotInSensorRange = sensors.filter(checkRangeSensor => checkRangeSensor.coordInRange(coord)).length === 0
+                const pointInSensorRange = sensors
+                    .filter(s => s.x !== sensor.x && s.y !== sensor.y) // obviously the point isn't in this sensors range
+                    .filter(checkRangeSensor => checkRangeSensor.coordInRange(coord))
+                const coordNotInSensorRange = pointInSensorRange.length === 0
                 if(coordNotInSensorRange) {
                     console.log(`Perimeter coord: ${coord} within bounds: ${bounds} and not in any sensor range`)
                     return coord[0] * BEACON_MULT + coord[1]

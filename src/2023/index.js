@@ -1,11 +1,12 @@
-const { getRawInput } = require('../util/inputUtils')
+const { getRawInput, getSolutions, toRunPaddedSet, requirePaddedModule } = require('../util/inputUtils')
 const path = require('path')
 const year = path.basename(__dirname)
-const day01 = require('./01')
+const allSolutions = getSolutions(__dirname)
 
 module.exports = (daysToRun = []) => {
-    daysToRun.forEach(() => {
-
+    const solutionsToRun = toRunPaddedSet(daysToRun, allSolutions)
+    solutionsToRun.forEach(solutionDay => {
+        const solutionModule = requirePaddedModule(__dirname, solutionDay)
+        console.log(`Day ${solutionDay}: `, solutionModule(getRawInput(year, solutionDay)))
     })
-    console.log('Day 01: ', day01(getRawInput(year, 1)))
 }

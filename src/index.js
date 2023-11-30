@@ -1,10 +1,13 @@
 const { getYearDirs } = require('./util/inputUtils')
 
-const yearsWithSolutions = getYearDirs(__dirname)
-const yearArgs = process.argv.slice(2)
-const toRun = yearArgs.length > 0 ? yearsWithSolutions.filter(year => yearArgs.includes(year)) : yearsWithSolutions
-toRun.forEach(dir => {
+const argv = process.argv.slice(2).map(arg => parseInt(arg))
+const yearArgs = new Set(argv.filter(arg => arg > 25))
+const daysArgs = new Set(argv.filter(arg => arg >= 1 && arg <= 25))
+const yearsToRun = getYearDirs(__dirname, yearArgs)
+
+console.log(`Running years: ${[...yearsToRun]} and days: ${[...daysArgs]}`)
+yearsToRun.forEach(dir => {
     const yearSolution = require(`./${dir}`)
-    const results = yearSolution()
+    const results = yearSolution(daysArgs)
     console.log(results)
 })

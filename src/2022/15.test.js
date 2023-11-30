@@ -15,5 +15,5 @@ Sensor at x=14, y=3: closest beacon is at x=15, y=3
 Sensor at x=20, y=1: closest beacon is at x=15, y=3`
 
 test('Day 15', () => {
-    expect(solution({data: primer, yPos: 10, bBounds: [0, 20]})).toEqual([26, 56000011])
+    expect(solution(primer, { yPos: 10, bBounds: [0, 20]})).toEqual([26, 56000011])
 })

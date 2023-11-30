@@ -102,9 +102,9 @@ const coordsInBounds = (coords, bounds) => {
     return (bounds[0] <= cx && cx <= bounds[1]) && (bounds[0] <= cy && cy <= bounds[1])
 }
 
-module.exports = (input) => {
-    const {data, yPos, bBounds} = input
-    const sensors = parse(data)
+module.exports = (input, options) => {
+    const {yPos, bBounds} = options
+    const sensors = parse(input)
     const dmz = aggregateSensors(sensors, yPos)
     const distressBeaconFreq = part2(sensors, bBounds)
     return [dmz, distressBeaconFreq]

@@ -27,11 +27,6 @@ Monkey 3:
     If true: throw to monkey 0
     If false: throw to monkey 1`
 
-const cases = [
-  [primer, 20, 10605],
-  [primer, 10000, 2713310158]
-]
-
-test.each(cases)('Day 11', (input, rounds, result) => {
-  expect(solution(input, rounds)).toEqual(result)
+test('Day 11', () => {
+  expect(solution(primer)).toEqual([10605, 2713310158])
 })

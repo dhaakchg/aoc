@@ -13,7 +13,7 @@
     "aoc": "node ./src/index.js",
     "2022": "npm run aoc 2022",
     "2023": "npm run aoc 2023",
-    "test": "jest"
+    "test": "jest --verbose"
   },
   "devDependencies": {
     "@types/jest": "^29.2.5",

@@ -1,15 +1,15 @@
 const Monkey = require('../util/monkey')
 const {range} = require("../util/helpers");
 
-module.exports = (input, rndCound) => {
+const calcMonkeyBusines = (input, rndCount) => {
   let monkeys = []
   input.split(/\n{2}/).forEach(chunk => monkeys.push(new Monkey(chunk)))
   const product = monkeys.reduce((p, monkey) => p *= monkey.test.testNum, 1n)
   monkeys.forEach(monkey => monkey.product = product)
-  const rounds = range(1, rndCound)
+  const rounds = range(1, rndCount)
   rounds.forEach(round => {
     monkeys.forEach((monkey, i, array) => {
-      const turnResult = monkey.turn(rndCound === 20)
+      const turnResult = monkey.turn(rndCount === 20)
       // console.log(turnResult.log.join('\n'))
       turnResult.transfer.forEach(transfer => {
         const {targetMonkey, worryLevel} = transfer
@@ -23,7 +23,9 @@ module.exports = (input, rndCound) => {
       // console.log(`== After round ${round} ==\n${monkeys.map(m => `Monkey ${m.id} inspected items ${m.monkeyBusiness} times`).join('\n')}`)
     }
   })
-  const totalMonkeyBusiness = monkeys.map(monkey => monkey.monkeyBusiness).sort((a, b) => b - a).slice(0,2).reduce((a, n) => a * n)
-  // console.log(`Total monkey business: ${totalMonkeyBusiness} after ${rndCound} rounds`)
-  return totalMonkeyBusiness
+  return monkeys.map(monkey => monkey.monkeyBusiness).sort((a, b) => b - a).slice(0,2).reduce((a, n) => a * n)
+}
+
+module.exports = (input) => {
+  return [ calcMonkeyBusines(input, 20), calcMonkeyBusines(input, 10000) ]
 }

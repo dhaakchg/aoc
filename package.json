@@ -6,24 +6,20 @@
   "author": "dhaakchg",
   "license": "MIT",
   "engines": {
-    "node": ">=16"
+    "node": ">=18"
   },
   "scripts": {
     "lint": "eslint .",
-    "doit": "node ./src/index.js",
+    "aoc": "node ./src/index.js",
+    "2022": "npm run aoc 2022",
+    "2023": "npm run aoc 2023",
     "test": "jest"
   },
   "devDependencies": {
     "@types/jest": "^29.2.5",
     "eslint": "^8.22.0",
     "eslint-plugin-jest": "^26.8.3",
+    "glob": "^10.3.10",
     "jest": "^28.1.3"
-  },
-  "jest": {
-    "testPathIgnorePatterns": [
-      "<rootDir>/src/template",
-      "<rootDir>/src/util",
-      "<rootDir>/src/2022/12.test.js"
-    ]
   }
 }

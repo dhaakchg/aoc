@@ -10,9 +10,10 @@ abcone2threexyz
 xtwone3four
 4nineeightseven2
 zoneight234
-7pqrstsixteen`
+7pqrstsixteen
+oneight`
 
 test('Day 01', () => {
-    // expect(solution(primer1).part1).toEqual(142)
-    expect(solution(primer2).part2).toEqual(281)
+    expect(solution(primer1).part1).toEqual(142)
+    expect(solution(primer2).part2).toEqual(299)
 })

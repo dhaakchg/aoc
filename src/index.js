@@ -5,7 +5,7 @@ const yearArgs = new Set(argv.filter(arg => arg > 25))
 const daysArgs = new Set(argv.filter(arg => arg >= 1 && arg <= 25))
 const yearsToRun = getYearDirs(__dirname, yearArgs)
 
-console.log(`Running years: ${[...yearsToRun]} and days: ${[...daysArgs]}`)
+console.log(`Running years: ${[...yearsToRun]} and days: ${[...daysArgs].length === 0 ? 'all' : [...daysArgs]}`)
 yearsToRun.forEach(dir => {
     const yearSolution = require(`./${dir}`)
     const results = yearSolution(daysArgs)

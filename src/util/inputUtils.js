@@ -39,10 +39,9 @@ const getSolutions = dirPath => {
     )
 }
 
-const toRunPaddedSet = (desiredDays, allSolutionSet) => {
-    if(desiredDays.length > 0) {
-        const desiredDaysSet = new Set(desiredDays)
-        return new Set([...allSolutionSet].filter(s => desiredDaysSet.has(s))).values().next().value
+const toRunPaddedSet = (desiredDaysSet, allSolutionSet) => {
+    if(desiredDaysSet.size > 0) {
+        return new Set([...allSolutionSet].filter(s => desiredDaysSet.has(s)))
     } else {
         return allSolutionSet
     }

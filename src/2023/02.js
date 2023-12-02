@@ -36,7 +36,7 @@ const findPower = (gameData) => {
     return gameData.map(({sets}) => {
         const bag = new Bag(0, 0, 0)
         sets.map(set => {
-            Object.keys(set).forEach(color => bag[color] = set[color] > bag[color] ? set[color] : bag[color])
+            Object.keys(set).forEach(color => bag[color] = Math.max(set[color], bag[color]))
         })
         return Object.values(bag).reduce((a, c) => a * c)
     }).reduce((a, c) => a + c)

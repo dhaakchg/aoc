@@ -14,12 +14,23 @@ class Grid {
     }
   }
 
+  as1dArray() {
+    return [...this.grid]
+  }
   getIndex(row, col) {
     if((0 <= row && row < this.rows) && (0 <= col && col < this.cols)) {
       return (row * this.cols) + col
     } else {
       throw new Error(`Index out of Bounds for: [${row}][${col}]`)
     }
+  }
+
+  getAdjacent(row, col) {
+
+  }
+
+  getRowColFromIndex(index) {
+    return { row: Math.floor(index / this.cols), col: index % this.cols }
   }
 
   get(row, col) {
@@ -33,7 +44,37 @@ class Grid {
 
   findValue(value) {
     const index = this.grid.indexOf(value)
-    return index === -1 ? null : [Math.floor(index/ this.cols), index % this.cols]
+    return index === -1 ? null : [Math.floor(index / this.cols), index % this.cols]
+  }
+
+  getRow(row) {
+    if(0 <= row && row < this.rows) {
+      return this.grid.slice(row * this.cols, (row * this.cols) + this.cols)
+    } else {
+      throw new Error(`Index out of Bounds for: [${row}][0-${this.cols}]`)
+    }
+  }
+
+  getRows() {
+    return range(0, this.rows - 1).map(r => {
+      return this.grid.slice(r * this.cols, (r * this.cols) + this.cols)
+    })
+  }
+
+  arePointsAdjacent(p1, p2) {
+    /**
+     *  x x x
+     *  x p x
+     *  x x x
+     */
+    return (p2.row === p1.row - 1 && p2.col === p1.col) ||   // N
+        (p2.row === p1.row - 1 && p2.col === p1.col + 1) || // NE
+        (p2.row === p1.row && p2.col === p1.col + 1) || // E
+        (p2.row === p1.row + 1 && p2.col === p1.col + 1) || // SE
+        (p2.row === p1.row + 1 && p2.col === p1.col) || // S
+        (p2.row === p1.row + 1 && p2.col === p1.col - 1) || // SW
+        (p2.row === p1.row && p2.col === p1.col - 1) || // W
+        (p2.row === p1.row - 1 && p2.col === p1.col - 1)    // NW
   }
 
   toString() {

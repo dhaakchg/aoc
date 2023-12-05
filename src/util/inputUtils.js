@@ -19,6 +19,8 @@ const splitClean = raw => {
   return raw.replaceAll('\r', '').split('\n').map(chunk => chunk.trim()).filter(chunk => chunk)
 }
 
+const splitOnEmptyLine = raw => raw.split(/\n\s*\n/)
+
 const getYearDirs = (dirPath, desiredYearsSet) => {
     const allYearsWithDir = fs.readdirSync(dirPath, { withFileTypes: true })
         .filter(dirent => dirent.isDirectory() && dirent.name.match(/\d\d\d\d/))
@@ -47,4 +49,4 @@ const toRunPaddedSet = (desiredDaysSet, allSolutionSet) => {
     }
 }
 
-module.exports = { splitClean, getRawInput, requirePaddedModule, getYearDirs, getSolutions, toRunPaddedSet }
+module.exports = { splitClean, splitOnEmptyLine, getRawInput, requirePaddedModule, getYearDirs, getSolutions, toRunPaddedSet }

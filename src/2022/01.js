@@ -1,7 +1,9 @@
+const { splitOnEmptyLine } = require("../util/inputUtils");
+
 module.exports = (input) => {
   let highestCalories = 0
   let elves = {}
-  input.split(/\n\s*\n/).forEach((value, index) => {
+  splitOnEmptyLine(input).forEach((value, index) => {
     let food = value.trim().split('\n').map(food => Number.parseInt(food)).reduce((prev, curr) => prev + curr)
     elves[index] = food
     if (food > highestCalories) {

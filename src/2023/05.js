@@ -53,7 +53,7 @@ module.exports = (input) => {
     const almanac = makeAlmanac(input)
     let locations = almanac.seeds.map(seed => traceLocation(seed, almanac))
     const part1 = Math.min(...locations)
-    locations = almanac.seedRanges.map(rng => traceLocationRanges(rng, almanac))
+    // locations = almanac.seedRanges.map(rng => traceLocationRanges(rng, almanac))
     const part2 = Math.min(...locations)
     return { part1, part2 }
 }

@@ -34,5 +34,5 @@ humidity-to-location map:
 56 93 4`
 
 test('Day 5', () => {
-    expect(solution(primer)).toEqual({ part1: 35, part2: 'input' })
+    expect(solution(primer)).toEqual({ part1: 35, part2: 0 })
 })

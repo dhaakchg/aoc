@@ -41,20 +41,19 @@ const traceLocation = (seed, almanac) => {
 }
 
 const traceLocationRanges = (seedRange, almanac) => {
-    const locations = []
     const { start, end } = seedRange
+    let lowest = traceLocation(start, almanac)
     for (let seed = start; seed <= end; seed++) {
-        locations.push(traceLocation(seed, almanac))
+        lowest = Math.min(traceLocation(seed, almanac), lowest)
     }
-    return locations
+    return lowest
 }
 
 module.exports = (input) => {
     const almanac = makeAlmanac(input)
-    console.log(`${JSON.stringify(almanac)}`)
     let locations = almanac.seeds.map(seed => traceLocation(seed, almanac))
     const part1 = Math.min(...locations)
     locations = almanac.seedRanges.map(rng => traceLocationRanges(rng, almanac))
-    const part2 = Math.min(...locations.flat())
+    const part2 = Math.min(...locations)
     return { part1, part2 }
 }

@@ -1,7 +1,7 @@
 const solution = require('./06')
-const primer = `primer
-input`
+const primer = `Time:      7  15   30
+Distance:  9  40  200`
 
 test('Day 6', () => {
-    expect(solution(primer)).toEqual({ part1: 'primer', part2: 'input' })
+    expect(solution(primer)).toEqual({ part1: 288, part2: 0 })
 })

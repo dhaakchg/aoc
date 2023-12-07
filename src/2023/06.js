@@ -19,6 +19,7 @@ const parse2 = (input) => {
 }
 
 const waysToWin = (race) => {
+    // You can then calculate for which x you exactly reach the record distance d by solving d = (t - x) * x (i.e. just setting d equal to the distance you will travel). This is a quadratic equation.
     const { raceLength, recordDist } = race
     const buttonHolds = range(0, raceLength)
     const winningHolds = []

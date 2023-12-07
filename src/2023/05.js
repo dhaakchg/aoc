@@ -1,6 +1,5 @@
 const { splitOnEmptyLine } = require("../util/inputUtils");
 
-const sortRanges = () => null
 const makeAlmanac = (input) => {
     const chunks = splitOnEmptyLine(input)
     const almanac = {}
@@ -30,6 +29,15 @@ const lookup = (srcNum, map) => {
     }
     return srcNum
 }
+
+const lookupR = (dstNum, map) => {
+    for(const mapRng of map) {
+        if(dstNum >= mapRng.dst[0] && dstNum <= mapRng.dst[1] ) {
+            return mapRng.src[1] - (mapRng.dst[1] - dstNum)
+        }
+    }
+    return dstNum
+}
 const traceLocation = (seed, almanac) => {
     let srcNum = seed
     Object.keys(almanac).filter(map => !map.match(/seeds|seedRanges/)).forEach(map => {
@@ -47,11 +55,39 @@ const traceLocationRanges = (seedRange, almanac) => {
     return lowest
 }
 
+// do it backwards from 0
+const traceSeed = (location, almanac) => {
+    let dstNum = location
+    Object.keys(almanac).filter(map => !map.match(/seeds|seedRanges/)).reverse().forEach(map => {
+        dstNum = lookupR(dstNum, almanac[map])
+    })
+    return dstNum
+}
+
+const seedInRanges = (seed, almanac) => {
+    for (let rng of almanac.seedRanges) {
+        if (seed >= rng.start && seed <= rng.end) return true
+    }
+    return false
+}
+
 module.exports = (input) => {
     const almanac = makeAlmanac(input)
-    let locations = almanac.seeds.map(seed => traceLocation(seed, almanac))
-    const part1 = Math.min(...locations)
-    locations = almanac.seedRanges.map(rng => traceLocationRanges(rng, almanac))
-    const part2 = Math.min(...locations)
+    // let locations = almanac.seeds.map(seed => traceLocation(seed, almanac))
+    // const part1 = Math.min(...locations)
+    // locations = almanac.seedRanges.map(rng => traceLocationRanges(rng, almanac))
+    // const part2 = Math.min(...locations)
+    let found = false
+    let part1 = -1
+    while (!found) {
+        part1++
+        found = almanac.seeds.includes(traceSeed(part1, almanac))
+    }
+    found = false
+    let part2 = -1
+    while (!found) {
+        part2++
+        found = seedInRanges(traceSeed(part2, almanac), almanac)
+    }
     return { part1, part2 }
 }

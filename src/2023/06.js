@@ -10,8 +10,12 @@ const parseRaces = (input) => {
     for (let i = 0; i < time.length; i++) {
         races.push({ raceLength: time[i], recordDist: distance[i]})
     }
-    console.log(races)
     return races
+}
+
+const parse2 = (input) => {
+    const [ time, distance ] = splitClean(input).map(val => parseInt(val.split(':')[1].replace(/\s+/g, '')))
+    return [{ raceLength: time, recordDist: distance }]
 }
 
 const waysToWin = (race) => {
@@ -21,15 +25,15 @@ const waysToWin = (race) => {
     for(let boatSpeed of buttonHolds) {
         const timeLeft = (raceLength - boatSpeed)
         const distance = boatSpeed * timeLeft
-        console.log(`Held button for: ${boatSpeed}ms, boat moved at ${boatSpeed} mm/ms for ${timeLeft}ms for total: ${distance}mm vs record: ${recordDist}`)
+        // console.log(`Held button for: ${boatSpeed}ms, boat moved at ${boatSpeed} mm/ms for ${timeLeft}ms for total: ${distance}mm vs record: ${recordDist}`)
         if(distance > recordDist) winningHolds.push(boatSpeed)
     }
-    console.log(`Race: ${JSON.stringify(race)} had ${winningHolds.length} ways to win`)
+    // console.log(`Race: ${JSON.stringify(race)} had ${winningHolds.length} ways to win`)
     return winningHolds.length
 }
 
 module.exports = (input) => {
-    const races = parseRaces(input)
-    const part1 = races.map(race => waysToWin(race)).reduce((a, c) => a * c)
-    return { part1, part2: 0 }
+    const part1 = parseRaces(input).map(race => waysToWin(race)).reduce((a, c) => a * c)
+    const part2 = parse2(input).map(race => waysToWin(race)).reduce((a, c) => a * c)
+    return { part1, part2 }
 }

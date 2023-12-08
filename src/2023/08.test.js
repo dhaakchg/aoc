@@ -11,7 +11,7 @@ EEE = (EEE, EEE)
 GGG = (GGG, GGG)
 ZZZ = (ZZZ, ZZZ)`
 
-    expect(solution(input)).toEqual({ part1: 6, part2: 20 })
+    expect(solution(input)).toEqual({ part1: 2, part2: 0 })
 })
 
 test('Day 8 test2', () => {
@@ -22,5 +22,5 @@ AAA = (BBB, BBB)
 BBB = (AAA, ZZZ)
 ZZZ = (ZZZ, ZZZ)`
 
-    expect(solution(input)).toEqual({ part1: 2, part2: 20 })
+    expect(solution(input)).toEqual({ part1: 6, part2: 0 })
 })

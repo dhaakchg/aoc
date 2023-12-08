@@ -66,6 +66,8 @@ class Grid {
      *  x x x
      *  x p x
      *  x x x
+     *
+     *  TODO: refactor to [Math.round(Math.cos(Math.PI * 1 / 4)), Math.sin(Math.PI * 2 / 4)] usage
      */
     return (p2.row === p1.row - 1 && p2.col === p1.col) ||   // N
         (p2.row === p1.row - 1 && p2.col === p1.col + 1) || // NE

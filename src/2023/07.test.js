@@ -6,5 +6,5 @@ KTJJT 220
 QQQJA 483`
 
 test('Day 7', () => {
-    expect(solution(primer)).toEqual({ part1: 6440, part2: 0 })
+    expect(solution(primer)).toEqual({ part1: 6440, part2: 5905 })
 })

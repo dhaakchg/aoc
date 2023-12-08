@@ -27,8 +27,8 @@ class Poker {
             c = this.cards.indexOf(h2[i]) - this.cards.indexOf(h1[i])
         }
         const sort = Math.sign(c)
-        const sym = sort === 1 ? '>' : '<'
-        console.log(`Sort ${h1} ${this.prettyType(h1)} ${sym} ${this.prettyType(h2)} ${h2}`)
+        // const sym = sort === 1 ? '>' : '<'
+        // console.log(`Sort ${h1} ${this.prettyType(h1)} ${sym} ${this.prettyType(h2)} ${h2}`)
         return sort
     }
     cardCounts(hand) {
@@ -88,13 +88,13 @@ module.exports = (input) => {
         return acc
     }, 0)
 
-    console.log('PART 2')
+    // console.log('PART 2')
     poker = new Poker(p2cards)
     handsAndBids.sort((h1, h2) => poker.compareHands(h1.hand, h2.hand))
     const part2 = handsAndBids.reduce((acc, c, i) => {
         acc += c.bid * (i + 1)
         return acc
     }, 0)
-    console.log(`sorted: ${JSON.stringify(handsAndBids, null, 2)}`)
+    // console.log(`sorted: ${JSON.stringify(handsAndBids, null, 2)}`)
     return { part1, part2 }
 }

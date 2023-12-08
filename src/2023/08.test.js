@@ -1,7 +1,26 @@
 const solution = require('./08')
-const primer = `primer
-input`
+test('Day 8 test1', () => {
 
-test('Day 8', () => {
-    expect(solution(primer)).toEqual({ part1: 'primer', part2: 'input' })
+    const input = `RL
+
+AAA = (BBB, CCC)
+BBB = (DDD, EEE)
+CCC = (ZZZ, GGG)
+DDD = (DDD, DDD)
+EEE = (EEE, EEE)
+GGG = (GGG, GGG)
+ZZZ = (ZZZ, ZZZ)`
+
+    expect(solution(input)).toEqual({ part1: 6, part2: 20 })
+})
+
+test('Day 8 test2', () => {
+
+    const input = `LLR
+
+AAA = (BBB, BBB)
+BBB = (AAA, ZZZ)
+ZZZ = (ZZZ, ZZZ)`
+
+    expect(solution(input)).toEqual({ part1: 2, part2: 20 })
 })

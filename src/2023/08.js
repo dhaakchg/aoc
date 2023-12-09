@@ -1,5 +1,5 @@
 const {splitClean} = require("../util/inputUtils");
-const lcm = require('../util/lcm')
+const { lcm } = require('../util/helpers')
 
 const parseInstructions = (input) => {
     const cleaned = splitClean(input)
@@ -11,27 +11,42 @@ const parseInstructions = (input) => {
     return { instructions, nodes }
 }
 
-const navigate = ({instructions, nodes}, stopCond) => {
-    let currentNode = nodes[0]
-    let steps = 0
-    while (!stopCond(currentNode)) {
+const navigate = ({ instructions, nodes }, startNodes) => {
+    const ghosts = []
+    startNodes.forEach((node) => {
+        ghosts.push({ node, steps: 0, cycles: []})
+    })
+    const stopCond = ghosts => ghosts.every(ghost => ghost.cycles.length >= 1)
+    while(!stopCond(ghosts)) {
         for(let instruction of instructions) {
             // console.log(`At node: ${currentNode.name}, L/R = ${JSON.stringify(currentNode.data)}, steps: ${steps}`)
             if (instruction === 'L') {
-                currentNode = nodes.find(node => node.name === currentNode.data.left)
+                ghosts.forEach(ghost => {
+                    ghost.node = nodes.find(node => node.name === ghost.node.data.left)
+                })
             } else {
-                currentNode = nodes.find(node => node.name === currentNode.data.right)
+                ghosts.forEach(ghost => {
+                    ghost.node = nodes.find(node => node.name === ghost.node.data.right)
+                })
             }
-            // console.log(`\tGoing ${instruction} to ${currentNode.name}`)
-            steps++
+            ghosts.forEach(ghost => ghost.steps += 1)
+            ghosts.forEach((ghost) => {
+                if(ghost.node.name.endsWith('Z')) {
+                    ghost.cycles.push(ghost.steps)
+                }
+            })
         }
     }
-    return steps
+    // ghosts.forEach((ghost, i) => {
+    //     console.log(`Ghost ${i} at ${ghost.node.name} in ${ghost.steps} cycles: ${ghost.cycles}`)
+    // })
+    // console.log(`${ghosts.map(ghost => ghost.cycles[0]).join(' ')}`)
+    return ghosts.map(ghost => ghost.cycles[0]).reduce((a, c) => lcm(a, c), 1)
 }
 
 module.exports = (input) => {
     const parsed = parseInstructions(input)
-    const p1stop = cnode => cnode.name === 'ZZZ'
-    const part1 = navigate(parsed, p1stop)
-    return { part1, part2: 0 }
+    const part1 = navigate(parsed, parsed.nodes.filter(node => node.name === 'AAA'))
+    const part2 = navigate(parsed, parsed.nodes.filter(node => node.name.endsWith('A')))
+    return { part1, part2 }
 }

@@ -11,7 +11,7 @@ EEE = (EEE, EEE)
 GGG = (GGG, GGG)
 ZZZ = (ZZZ, ZZZ)`
 
-    expect(solution(input)).toEqual({ part1: 2, part2: 0 })
+    expect(solution(input)).toEqual(expect.objectContaining({ part1: 2 }))
 })
 
 test('Day 8 test2', () => {
@@ -22,10 +22,10 @@ AAA = (BBB, BBB)
 BBB = (AAA, ZZZ)
 ZZZ = (ZZZ, ZZZ)`
 
-    expect(solution(input)).toEqual({ part1: 6, part2: 0 })
+    expect(solution(input)).toEqual(expect.objectContaining({ part1: 6 }))
 })
 
-test.skip('Day 8 test3', () => {
+test('Day 8 test3', () => {
 
     const input = `LR
 
@@ -38,5 +38,5 @@ test.skip('Day 8 test3', () => {
 22Z = (22B, 22B)
 XXX = (XXX, XXX)`
 
-    expect(solution(input)).toEqual({ part1: 6, part2: 6 })
+    expect(solution(input)).toEqual(expect.objectContaining({ part2: 6 }))
 })

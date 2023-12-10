@@ -4,5 +4,5 @@ const primer = `0 3 6 9 12 15
 10 13 16 21 30 45`
 
 test('Day 9', () => {
-    expect(solution(primer)).toEqual({ part1: 114, part2: 0 })
+    expect(solution(primer)).toEqual({ part1: 114, part2: 2 })
 })

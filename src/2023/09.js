@@ -21,33 +21,24 @@ const getSequencesToZeros = (seq) => {
     extrapolations.reverse()
     return extrapolations
 }
-const extrapolateArrayEnds = (extrapolations) => {
+const extrapolateArrayEnds = (extrapolations, reverse = false) => {
+    if (reverse) extrapolations.forEach(extrapolation => extrapolation.reverse())
     extrapolations.forEach((extrapolation, i) => {
         if(i === 0) {
             extrapolation.push(0)
         } else {
             const prevLastVal = extrapolations[i - 1][extrapolations[i - 1].length - 1]
-            extrapolation.push(extrapolation[extrapolation.length - 1] + prevLastVal)
+            extrapolation.push(extrapolation[extrapolation.length - 1] + (reverse ? prevLastVal * -1 : prevLastVal))
         }
     })
+    // console.log(`${extrapolations.join('\n')}`)
     return extrapolations.at(-1).at(-1)
-}
-const extrapolateArrayBegin = (extrapolations) => {
-    extrapolations.forEach((extrapolation, i) => {
-        if(i === 0) {
-            extrapolation.unshift(0)
-        } else {
-            const prevFirstVal = extrapolations[i - 1][0]
-            extrapolation.unshift(extrapolation[0] - prevFirstVal)
-        }
-    })
-    return extrapolations.at(-1).at(0)
 }
 
 module.exports = (input) => {
     const histories = parseInput(input)
     const toZeros = histories.map(history => getSequencesToZeros(history))
     const part1 = toZeros.map(ex => extrapolateArrayEnds(ex)).reduce((a, c) => a + c)
-    const part2 = toZeros.map(ex => extrapolateArrayBegin(ex)).reduce((a, c) => a + c)
+    const part2 = toZeros.map(ex => extrapolateArrayEnds(ex, true)).reduce((a, c) => a + c)
     return { part1, part2 }
 }

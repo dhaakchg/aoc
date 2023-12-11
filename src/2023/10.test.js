@@ -1,7 +1,22 @@
 const solution = require('./10')
-const primer = `primer
-input`
+
+const test1 = `
+.....
+.S-7.
+.|.|.
+.L-J.
+.....`
+
+const test2 = `7-F7-
+.FJ|7
+SJLL7
+|F--J
+LJ.LJ`
 
 test('Day 10', () => {
-    expect(solution(primer)).toEqual({ part1: 'primer', part2: 'input' })
+    expect(solution(test1)).toEqual({ part1: 4, part2: 0 })
+})
+
+test('Day 10', () => {
+    expect(solution(test2)).toEqual({ part1: 8, part2: 0 })
 })

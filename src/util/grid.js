@@ -1,17 +1,17 @@
 const {range} = require("./helpers");
 
 class Grid {
-  constructor(config) {
-    config = { fill: '.', ...config}
-    if('data' in config) {
-      this.rows = config.data.length
-      this.cols = config.data[0].length
-      this.grid = config.data.map(row => row.split('')).flat()
+  constructor({ data, rows, cols, fill = '.', subGridOrigin = { row: 0, col: 0 } }) {
+    if(data && data.length > 0 && data[0].length > 0) {
+      this.rows = data.length
+      this.cols = data[0].length
+      this.grid = data.map(row => row.split('')).flat()
     } else {
-      this.rows = config.rows
-      this.cols = config.cols
-      this.grid = new Array(this.rows * this.cols).fill(config.fill)
+      this.rows = rows
+      this.cols = cols
+      this.grid = new Array(this.rows * this.cols).fill(fill)
     }
+    this.subGridOrigin = subGridOrigin
   }
 
   as1dArray() {
@@ -23,10 +23,6 @@ class Grid {
     } else {
       throw new Error(`Index out of Bounds for: [${row}][${col}]`)
     }
-  }
-
-  getAdjacent(row, col) {
-
   }
 
   getRowColFromIndex(index) {
@@ -69,7 +65,7 @@ class Grid {
      *
      *  TODO: refactor to [Math.round(Math.cos(Math.PI * 1 / 4)), Math.sin(Math.PI * 2 / 4)] usage
      */
-    return (p2.row === p1.row - 1 && p2.col === p1.col) ||   // N
+    return (p2.row === p1.row - 1 && p2.col === p1.col) ||   // N = p1.row + Math.round(Math.sin(2/4 * Math.PI))
         (p2.row === p1.row - 1 && p2.col === p1.col + 1) || // NE
         (p2.row === p1.row && p2.col === p1.col + 1) || // E
         (p2.row === p1.row + 1 && p2.col === p1.col + 1) || // SE
@@ -77,6 +73,23 @@ class Grid {
         (p2.row === p1.row + 1 && p2.col === p1.col - 1) || // SW
         (p2.row === p1.row && p2.col === p1.col - 1) || // W
         (p2.row === p1.row - 1 && p2.col === p1.col - 1)    // NW
+  }
+
+  getAdjacentGrid(origin, radius = 1) {
+    // include origin!
+    // Edge cases of origin of 0, 0?
+    // NW N NE 5 6 7 -- negative values in relation to origin
+    // W  O  E 4 0 8 -- Not entirely sure why this has to be reversed. Math.
+    // SW S SE 3 2 1 -- positive values in relation to origin
+    const radians = [[5, 6, 7], [4, 0, 8],  [3, 2, 1]] // start at NW corner 3/4pi
+    const adjacentCoords = radians.map(adjRow => adjRow.map(piFraction => {
+      const col = origin.col + (piFraction === 0 ? 0 : Math.round(radius * Math.cos((piFraction / 4) * Math.PI))) // x-axis
+      const row = origin.row + (piFraction === 0 ? 0 : Math.round(radius * Math.sin((piFraction / 4) * Math.PI))) // y-axis
+      return { row, col }
+    }).filter(({row, col}) => (0 <= row && row < this.rows) && (0 <= col && col < this.cols))) // filter out of bounds coords.
+    // Gross.
+    const data = adjacentCoords.map(adjRow => adjRow.map(({row, col }) => this.get(row, col)).join(''))
+    return new Grid({ data, subGridOrigin: adjacentCoords.at(0).at(0) })
   }
 
   toString() {

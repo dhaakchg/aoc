@@ -1,4 +1,5 @@
 const {range} = require("./helpers");
+const GridCoord = require('./gridCoord')
 
 class Grid {
   constructor({ data, rows, cols, fill = '.', subGridOrigin = { row: 0, col: 0 } }) {
@@ -17,34 +18,43 @@ class Grid {
   as1dArray() {
     return [...this.grid]
   }
-  getIndex(row, col) {
-    if((0 <= row && row < this.rows) && (0 <= col && col < this.cols)) {
-      return (row * this.cols) + col
+  getIndex(coord) {
+    if(this.coordInBounds(coord)) {
+      return (coord.row * this.cols) + coord.col
     } else {
-      throw new Error(`Index out of Bounds for: [${row}][${col}]`)
+      throw new Error(`Index out of Bounds for: [${coord.row}][${coord.col}]`)
     }
   }
 
+  rowInBounds(row) {
+    return (0 <= row && row < this.rows)
+  }
+
+  colInbounds(col) {
+    return (0 <= col && col < this.cols)
+  }
+  coordInBounds(coord) {
+    return this.rowInBounds(coord.row) && this.colInbounds(coord.col)
+  }
   getRowColFromIndex(index) {
-    return { row: Math.floor(index / this.cols), col: index % this.cols }
+    return new GridCoord(Math.floor(index / this.cols), index % this.cols)
   }
 
-  get(row, col) {
-    return this.grid[this.getIndex(row, col)]
+  get(coord) {
+    return this.grid[this.getIndex(coord)]
   }
 
-  set(row, col, value) {
-    // console.log(`Setting grid[${row}][${col}] -> ${value}`)
-    this.grid[this.getIndex(row, col)] = value
+  set(coord, value) {
+    this.grid[this.getIndex(coord)] = value
   }
 
   findValue(value) {
     const index = this.grid.indexOf(value)
-    return index === -1 ? null : [Math.floor(index / this.cols), index % this.cols]
+    return index === -1 ? null : new GridCoord(Math.floor(index / this.cols), index % this.cols)
   }
 
   getRow(row) {
-    if(0 <= row && row < this.rows) {
+    if(this.rowInBounds(row)) {
       return this.grid.slice(row * this.cols, (row * this.cols) + this.cols)
     } else {
       throw new Error(`Index out of Bounds for: [${row}][0-${this.cols}]`)
@@ -75,6 +85,12 @@ class Grid {
         (p2.row === p1.row - 1 && p2.col === p1.col - 1)    // NW
   }
 
+  getAdajcentByRadian(coord, radian, radius = 1) {
+    const row = coord.row + (radian === 0 ? 0 : Math.round(radius * Math.sin((radian / 4) * Math.PI))) // y-axis
+    const col = coord.col + (radian === 0 ? 0 : Math.round(radius * Math.cos((radian / 4) * Math.PI))) // x-axis
+    return new GridCoord(row, col) // TODO: Change to GridCoord
+  }
+
   getAdjacentGrid(origin, radius = 1) {
     // include origin!
     // Edge cases of origin of 0, 0?
@@ -82,14 +98,27 @@ class Grid {
     // W  O  E 4 0 8 -- Not entirely sure why this has to be reversed. Math.
     // SW S SE 3 2 1 -- positive values in relation to origin
     const radians = [[5, 6, 7], [4, 0, 8],  [3, 2, 1]] // start at NW corner 3/4pi
-    const adjacentCoords = radians.map(adjRow => adjRow.map(piFraction => {
-      const col = origin.col + (piFraction === 0 ? 0 : Math.round(radius * Math.cos((piFraction / 4) * Math.PI))) // x-axis
-      const row = origin.row + (piFraction === 0 ? 0 : Math.round(radius * Math.sin((piFraction / 4) * Math.PI))) // y-axis
-      return { row, col }
-    }).filter(({row, col}) => (0 <= row && row < this.rows) && (0 <= col && col < this.cols))) // filter out of bounds coords.
+    const adjacentCoords = radians.map(adjRow => adjRow.map(radian => this.getAdajcentByRadian(origin, radian, radius))
+        // filter out of bounds coords.
+        .filter(coord => this.coordInBounds(coord))
+    )
     // Gross.
-    const data = adjacentCoords.map(adjRow => adjRow.map(({row, col }) => this.get(row, col)).join(''))
+    const data = adjacentCoords.map(adjRow => adjRow.map(coord => this.get(coord)).join(''))
     return new Grid({ data, subGridOrigin: adjacentCoords.at(0).at(0) })
+  }
+
+  getCardinalDirsFromPoint(p) {
+    const dirs = { N: 6, W: 4, S: 2, E: 8 }
+    const compass = {}
+    for (const [dir, radian] of Object.entries(dirs)) {
+      const adj = this.getAdajcentByRadian(p, radian)
+      if(this.coordInBounds(adj)) {
+        compass[dir] = this.get(adj)
+      } else {
+        compass[dir] = null
+      }
+    }
+    return compass
   }
 
   toString() {

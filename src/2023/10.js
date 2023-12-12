@@ -8,12 +8,17 @@ const parseInput = (input) => {
 
 const findStart = grid => grid.findValue('S')
 
+const findValidNav = (coord, grid) => {
+    const compass = grid.getCardinalDirsFromPoint(coord)
+
+}
+
 module.exports = (input) => {
     const grid = new Grid({data: splitClean(input)})
     console.log(grid.toString())
     const startCoords = findStart(grid)
-    console.log(`Start: ${startCoords}`)
-    const startAdj = grid.getAdjacentGrid({ row: startCoords[0], col: startCoords[1]})
+    console.log(`Start: ${JSON.stringify(startCoords)}, adj: ${JSON.stringify(grid.getCardinalDirsFromPoint(startCoords))}`)
+    const startAdj = grid.getAdjacentGrid(startCoords)
     console.log(`Start subgrid: ${startAdj.toString()}`)
     return { part1: 0, part2: 0 }
 }

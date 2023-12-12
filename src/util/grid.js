@@ -113,9 +113,9 @@ class Grid {
     for (const [dir, radian] of Object.entries(dirs)) {
       const adj = this.getAdajcentByRadian(p, radian)
       if(this.coordInBounds(adj)) {
-        compass[dir] = this.get(adj)
+        compass[dir] = { val: this.get(adj), coord: adj }
       } else {
-        compass[dir] = null
+        compass[dir] = { val: null, coord: null }
       }
     }
     return compass

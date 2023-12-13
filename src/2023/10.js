@@ -26,15 +26,32 @@ const Grid = require("../util/grid");
  * 23...
  */
 const PIPES = {
-    // conn from perspective of the joining pipe, not N, E
+    // conn from perspective of the origin pipe
     '|': { N: ['|', '7', 'F'], S: ['|', 'L', 'J'] },
     '-': { E: ['-', 'J', '7'], W: ['-', 'L', 'F'] },
     'L': { N: ['|', '7', 'F'], E: ['-', 'J', '7'] },
-    'J': { N: ['|', '7', 'F'], W: ['-', 'J', '7'] },
-    '7': { S: ['|', 'J', 'L'], W: ['-', 'J', '7'] },
-    'F': { S: ['|', 'L', 'J'], E: ['-', 'J', '7'] }
+    'J': { N: ['|', '7', 'F'], W: ['-', 'F', 'L'] },
+    '7': { S: ['|', 'J', 'L'], W: ['-', 'F', 'L'] },
+    'F': { S: ['|', 'J', 'L'], E: ['-', 'J', '7'] }
 }
-
+const detectStartPipe = grid => {
+    const coord = grid.findValue('S')
+    const compass = grid.getCardinalDirsFromPoint(coord)
+    const pipe = Object.keys(PIPES).find(pipe => {
+        let pipes = []
+        Object.keys(compass).filter(key => key !== 'origin').forEach(compassDir => {
+            const { val } = compass[compassDir]
+            if ( val !== null && pipesConnect(pipe, val, compassDir)) {
+                pipes.push(true)
+            }
+        })
+        return pipes.length === 2
+    })
+    grid.set(coord, pipe)
+    const connPipes = getConnPipes(coord, grid)
+    // const pipe = Object.entries(PIPES).find(([_key, value]) => connPipes.map(p => p.compassDir).every(dir => value.rev.includes(dir)))[0]
+    return { pipe, coord, connPipes }
+}
 const dirRev = dir => {
     if (dir === 'N') return 'S'
     if (dir === 'S') return 'N'
@@ -62,8 +79,8 @@ const findLoop = (startCoord, grid, pathGrid) => {
         cameFrom = compassDir
         currCoord = coord
         steps++
-        pathGrid.set(currCoord, steps)
-        console.log(`Path:\n${pathGrid.toString()}`)
+        pathGrid.set(currCoord, '*')
+        // console.log(`Path:\n${pathGrid.toString()}`)
     } while (!_.isEqual(currCoord, startCoord))
     return Math.round(steps / 2)
 }
@@ -79,21 +96,11 @@ const getConnPipes = (origin, grid) => {
     })
     return pipes
 }
-const detectStartPipe = grid => {
-    const coord = grid.findValue('S')
-    const compass = grid.getCardinalDirsFromPoint(coord)
-    const pipe = 'F'
-    grid.set(coord, pipe)
-    const connPipes = getConnPipes(coord, grid)
-    // const pipe = Object.entries(PIPES).find(([_key, value]) => connPipes.map(p => p.compassDir).every(dir => value.rev.includes(dir)))[0]
-    return { pipe, coord, connPipes }
-}
+
 
 module.exports = (input) => {
     const grid = new Grid({data: splitClean(input)})
     const pathGrid = new Grid({rows: grid.rows, cols: grid.cols})
-    console.log(grid.toString())
-    console.log(pathGrid.toString())
     const { pipe: startPipe, coord: startCoords, connPipes } = detectStartPipe(grid)
     // console.log(`Start: ${JSON.stringify(startCoords)} Pipe: ${startPipe}, adj: ${JSON.stringify(grid.getCardinalDirsFromPoint(startCoords))}`)
     // const startAdj = grid.getAdjacentGrid(startCoords)

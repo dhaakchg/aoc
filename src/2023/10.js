@@ -69,8 +69,8 @@ const pipesConnect = (fromPipe, toPipe, direction) => {
 }
 const isGround = char => char === '.'
 const findLoop = (startCoord, grid, pathGrid) => {
-    let steps = 0
     let currCoord = {...startCoord}
+    const loopCoords = [startCoord]
     pathGrid.set(currCoord, 0)
     let cameFrom = null
     do {
@@ -78,11 +78,11 @@ const findLoop = (startCoord, grid, pathGrid) => {
         const { compassDir, coord } = connPipes.find(pipe => pipe.compassDir !== dirRev(cameFrom))
         cameFrom = compassDir
         currCoord = coord
-        steps++
+        loopCoords.push(currCoord)
         pathGrid.set(currCoord, '*')
         // console.log(`Path:\n${pathGrid.toString()}`)
     } while (!_.isEqual(currCoord, startCoord))
-    return Math.round(steps / 2)
+    return loopCoords
 }
 
 const getConnPipes = (origin, grid) => {
@@ -105,6 +105,7 @@ module.exports = (input) => {
     // console.log(`Start: ${JSON.stringify(startCoords)} Pipe: ${startPipe}, adj: ${JSON.stringify(grid.getCardinalDirsFromPoint(startCoords))}`)
     // const startAdj = grid.getAdjacentGrid(startCoords)
     // console.log(`Start subgrid: ${startAdj.toString()}`)
-    const part1 = findLoop(startCoords, grid, pathGrid)
+    const loop = findLoop(startCoords, grid, pathGrid)
+    const part1 = Math.round((loop.length - 1) / 2) // start is duplicated at start and end of array
     return { part1, part2: 0 }
 }

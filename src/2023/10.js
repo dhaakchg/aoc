@@ -1,6 +1,7 @@
 const {splitClean} = require("../util/inputUtils");
 const _ = require('lodash')
 const Grid = require("../util/grid");
+const GridCoord = require("../util/gridCoord")
 
 /**
  *
@@ -56,7 +57,6 @@ const dirRev = dir => {
     if (dir === 'E') return 'W'
     if (dir === 'W') return 'E'
 }
-
 const isPipe = char => Object.keys(PIPES).includes(char)
 const pipesConnect = (fromPipe, toPipe, direction) => {
     if (!isPipe(fromPipe) || !isPipe(toPipe)) {
@@ -95,6 +95,33 @@ const getConnPipes = (origin, grid) => {
     return pipes
 }
 
+const coordOnLoop = (loop, coord) => loop.find(loopCoord => _.isEqual(loopCoord, coord)) !== undefined
+const fillGround = (grid, loop) => {
+    grid.as1dArray().forEach((v, i) => {
+        const gridCoord = grid.getRowColFromIndex(i)
+        if(!coordOnLoop(loop, gridCoord)) {
+            grid.set(gridCoord, '.')
+        }
+    })
+}
+
+const traceRay = (row, rowIdx, grid, loop) => {
+    let inLoop = 0
+    let inside = false
+    for(let col = 0; col < row.length; col++) {
+        const currentCoord = new GridCoord(rowIdx, col)
+        const nodeInside = coordOnLoop(loop, currentCoord)
+        const vertical = nodeInside && ['|', 'L', 'J'].includes(row[col])
+        if(vertical) inside = !inside
+        if(!nodeInside && inside) inLoop++
+    }
+    // console.log(`Tested row ${rowIdx}, found: ${inLoop}`)
+    return inLoop
+}
+
+const findInLoop = (grid, loop) => {
+    return grid.getRows().map((row, rowIdx) => traceRay(row, rowIdx, grid, loop)).reduce((a, c) => a + c, 0)
+}
 
 module.exports = (input) => {
     const grid = new Grid({data: splitClean(input)})
@@ -106,5 +133,8 @@ module.exports = (input) => {
     const loop = findLoop(startCoords, grid, pathGrid)
     console.log(`Path:\n${pathGrid.toString()}`)
     const part1 = Math.round((loop.length - 1) / 2) // start is duplicated at start and end of array
-    return { part1, part2: 1 }
+    // fillGround(grid, loop) // This takes too long for the actual input...
+    console.log(`After fill:\n${grid.toString()}`)
+    const part2 = findInLoop(grid, loop)
+    return { part1, part2 }
 }

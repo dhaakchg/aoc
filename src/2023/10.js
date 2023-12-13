@@ -65,7 +65,6 @@ const pipesConnect = (fromPipe, toPipe, direction) => {
         return (direction in PIPES[fromPipe]) && (PIPES[fromPipe][direction].includes(toPipe))
     }
 }
-const isGround = char => char === '.'
 const findLoop = (startCoord, grid, pathGrid) => {
     let currCoord = {...startCoord}
     const loopCoords = [startCoord]
@@ -82,7 +81,6 @@ const findLoop = (startCoord, grid, pathGrid) => {
     } while (!_.isEqual(currCoord, startCoord))
     return loopCoords
 }
-
 const getConnPipes = (origin, grid) => {
     const pipes = []
     const compass = grid.getCardinalDirsFromPoint(origin)
@@ -94,7 +92,6 @@ const getConnPipes = (origin, grid) => {
     })
     return pipes
 }
-
 const coordOnLoop = (loop, coord) => loop.find(loopCoord => _.isEqual(loopCoord, coord)) !== undefined
 const fillGround = (grid, loop) => {
     grid.as1dArray().forEach((v, i) => {
@@ -104,7 +101,6 @@ const fillGround = (grid, loop) => {
         }
     })
 }
-
 const traceRay = (row, rowIdx, grid, loop) => {
     let inLoop = 0
     let inside = false
@@ -118,7 +114,6 @@ const traceRay = (row, rowIdx, grid, loop) => {
     // console.log(`Tested row ${rowIdx}, found: ${inLoop}`)
     return inLoop
 }
-
 const findInLoop = (grid, loop) => {
     return grid.getRows().map((row, rowIdx) => traceRay(row, rowIdx, grid, loop)).reduce((a, c) => a + c, 0)
 }
@@ -131,10 +126,10 @@ module.exports = (input) => {
     // const startAdj = grid.getAdjacentGrid(startCoords)
     // console.log(`Start subgrid: ${startAdj.toString()}`)
     const loop = findLoop(startCoords, grid, pathGrid)
-    console.log(`Path:\n${pathGrid.toString()}`)
+    // console.log(`Path:\n${pathGrid.toString()}`)
     const part1 = Math.round((loop.length - 1) / 2) // start is duplicated at start and end of array
     // fillGround(grid, loop) // This takes too long for the actual input...
-    console.log(`After fill:\n${grid.toString()}`)
+    // console.log(`After fill:\n${grid.toString()}`)
     const part2 = findInLoop(grid, loop)
     return { part1, part2 }
 }

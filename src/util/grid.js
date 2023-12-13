@@ -88,7 +88,7 @@ class Grid {
   getAdajcentByRadian(coord, radian, radius = 1) {
     const row = coord.row + (radian === 0 ? 0 : Math.round(radius * Math.sin((radian / 4) * Math.PI))) // y-axis
     const col = coord.col + (radian === 0 ? 0 : Math.round(radius * Math.cos((radian / 4) * Math.PI))) // x-axis
-    return new GridCoord(row, col) // TODO: Change to GridCoord
+    return new GridCoord(row, col)
   }
 
   getAdjacentGrid(origin, radius = 1) {
@@ -107,15 +107,15 @@ class Grid {
     return new Grid({ data, subGridOrigin: adjacentCoords.at(0).at(0) })
   }
 
-  getCardinalDirsFromPoint(p) {
+  getCardinalDirsFromPoint(coord) {
     const dirs = { N: 6, W: 4, S: 2, E: 8 }
-    const compass = {}
+    const compass = { origin: { val: this.get(coord), coord } }
     for (const [dir, radian] of Object.entries(dirs)) {
-      const adj = this.getAdajcentByRadian(p, radian)
+      const adj = this.getAdajcentByRadian(coord, radian)
+      compass[dir] = { val: null, coord: null }
       if(this.coordInBounds(adj)) {
-        compass[dir] = { val: this.get(adj), coord: adj }
-      } else {
-        compass[dir] = { val: null, coord: null }
+        compass[dir].val = this.get(adj)
+        compass[dir].coord = adj
       }
     }
     return compass

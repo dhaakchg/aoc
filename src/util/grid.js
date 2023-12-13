@@ -53,11 +53,21 @@ class Grid {
     return index === -1 ? null : new GridCoord(Math.floor(index / this.cols), index % this.cols)
   }
 
+  findAll(searchValue) {
+    const coords = []
+    this.grid.forEach((gridValue, index) => {
+      if(gridValue === searchValue) {
+        coords.push(new GridCoord(Math.floor(index / this.cols), index % this.cols))
+      }
+    })
+    return coords
+  }
+
   getRow(row) {
     if(this.rowInBounds(row)) {
       return this.grid.slice(row * this.cols, (row * this.cols) + this.cols)
     } else {
-      throw new Error(`Index out of Bounds for: [${row}][0-${this.cols}]`)
+      throw new Error(`Index out of Bounds for: [${row}][0-${this.cols - 1}]`)
     }
   }
 
@@ -65,6 +75,18 @@ class Grid {
     return range(0, this.rows - 1).map(r => {
       return this.grid.slice(r * this.cols, (r * this.cols) + this.cols)
     })
+  }
+
+  getCol(col) {
+    if(this.colInbounds(col)) {
+      return range(0, this.rows - 1).map(row => this.grid[(row * this.cols) + col])
+    } else {
+      throw new Error(`Index out of Bounds for: [0-${this.rows - 1}][${col}]`)
+    }
+  }
+
+  getCols() {
+    return range(0, this.cols - 1).map(col => this.getCol(col))
   }
 
   arePointsAdjacent(p1, p2) {
@@ -121,6 +143,9 @@ class Grid {
     return compass
   }
 
+  manhattan(coord1, coord2) {
+    return Math.abs(coord1.col - coord2.col) + Math.abs(coord1.row - coord2.row)
+  }
   toString() {
     return range(0, this.rows - 1).map(r => {
       return this.grid.slice(r * this.cols, (r * this.cols) + this.cols).join('')

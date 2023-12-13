@@ -48,9 +48,7 @@ const detectStartPipe = grid => {
         return pipes.length === 2
     })
     grid.set(coord, pipe)
-    const connPipes = getConnPipes(coord, grid)
-    // const pipe = Object.entries(PIPES).find(([_key, value]) => connPipes.map(p => p.compassDir).every(dir => value.rev.includes(dir)))[0]
-    return { pipe, coord, connPipes }
+    return coord
 }
 const dirRev = dir => {
     if (dir === 'N') return 'S'
@@ -101,11 +99,12 @@ const getConnPipes = (origin, grid) => {
 module.exports = (input) => {
     const grid = new Grid({data: splitClean(input)})
     const pathGrid = new Grid({rows: grid.rows, cols: grid.cols})
-    const { pipe: startPipe, coord: startCoords, connPipes } = detectStartPipe(grid)
+    const startCoords = detectStartPipe(grid)
     // console.log(`Start: ${JSON.stringify(startCoords)} Pipe: ${startPipe}, adj: ${JSON.stringify(grid.getCardinalDirsFromPoint(startCoords))}`)
     // const startAdj = grid.getAdjacentGrid(startCoords)
     // console.log(`Start subgrid: ${startAdj.toString()}`)
     const loop = findLoop(startCoords, grid, pathGrid)
+    console.log(`Path:\n${pathGrid.toString()}`)
     const part1 = Math.round((loop.length - 1) / 2) // start is duplicated at start and end of array
-    return { part1, part2: 0 }
+    return { part1, part2: 1 }
 }

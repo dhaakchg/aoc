@@ -11,5 +11,5 @@ const primer = `...#......
 #...#.....`
 
 test('Day 11', () => {
-    expect(solution(primer)).toEqual({ part1: 367, part2: 0 })
+    expect(solution(primer)).toEqual({ part1: 374, part2: 0 })
 })

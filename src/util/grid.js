@@ -143,9 +143,6 @@ class Grid {
     return compass
   }
 
-  manhattan(coord1, coord2) {
-    return Math.abs(coord1.col - coord2.col) + Math.abs(coord1.row - coord2.row)
-  }
   toString() {
     return range(0, this.rows - 1).map(r => {
       return this.grid.slice(r * this.cols, (r * this.cols) + this.cols).join('')

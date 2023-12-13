@@ -1,6 +1,7 @@
 const {splitClean} = require("../util/inputUtils")
 const Grid = require("../util/grid")
 const GridCoord = require("../util/gridCoord")
+const {manhattan, combinationN, range} = require("../util/helpers")
 
 const orig  = `
 ...#......
@@ -44,7 +45,7 @@ const findEmptyRowCol = (grid) => {
     return { emptyRows, emptyCols }
 }
 
-const expandGalaxy = (universe, expansionFactor = 1) => {
+const expandGalaxyWithGrid = (universe, expansionFactor = 1) => {
     const { emptyRows, emptyCols } = findEmptyRowCol(universe)
     const galaxyCoords = findGalaxies(universe)
     const expandedUniverse = new Grid({
@@ -62,14 +63,38 @@ const expandGalaxy = (universe, expansionFactor = 1) => {
     })
     return expandedUniverse
 }
+
+const expandGalaxy = (universe, expansionFactor = 1) => {
+    const { emptyRows, emptyCols } = findEmptyRowCol(universe)
+    const galaxyCoords = findGalaxies(universe)
+    return galaxyCoords.map(galaxy => {
+        const { row, col } = galaxy
+        let newRow = row
+        let newCol = col
+        newRow += emptyRows.filter(r => row > r).length * expansionFactor
+        newCol += emptyCols.filter(c => col > c).length * expansionFactor
+        return new GridCoord(newRow, newCol)
+    })
+}
 const findGalaxies = grid => grid.findAll('#')
+
+const findDistances = galaxies => {
+    const distances = []
+    for (const pair of combinationN(range(0, galaxies.length - 1), 2)) {
+        distances.push(manhattan(galaxies[pair[0]], galaxies[pair[1]]))
+    }
+    return distances
+}
 
 module.exports = (input) => {
     const oU = new Grid({data: splitClean(input)})
-    const eU = expandGalaxy(oU)
-    console.log(`original\n${oU.toString()}\nrows:${oU.rows} cols:${oU.cols}\n${JSON.stringify(findGalaxies(oU))}`)
-    console.log(`expanded\n${eU.toString()}\nrows:${eU.rows} cols:${eU.cols}\n${JSON.stringify(findGalaxies(eU))}`)
+    const eU = expandGalaxyWithGrid(oU)
+    // console.log(`original\n${oU.toString()}\nrows:${oU.rows} cols:${oU.cols}\n${JSON.stringify(findGalaxies(oU))}`)
+    // console.log(`expanded\n${eU.toString()}\nrows:${eU.rows} cols:${eU.cols}\n${JSON.stringify(findGalaxies(eU))}`)
     const tU = new Grid({data: splitClean(expanded)})
-    console.log(`reference\n${tU.toString()}\nrows:${tU.rows} cols:${tU.cols}\n${JSON.stringify(findGalaxies(tU))}`)
-    return { part1: 367, part2: 0 }
+    // console.log(`reference\n${tU.toString()}\nrows:${tU.rows} cols:${tU.cols}\n${JSON.stringify(findGalaxies(tU))}`)
+    const galaxyCoords = expandGalaxy(oU)
+    const distances = findDistances(galaxyCoords)
+    const part1 = distances.reduce((a, c) => a + c, 0)
+    return { part1, part2: 0 }
 }

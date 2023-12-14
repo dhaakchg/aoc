@@ -86,15 +86,14 @@ const findDistances = galaxies => {
     return distances
 }
 
-module.exports = (input) => {
+module.exports = (input, factor = 999999) => {
     const oU = new Grid({data: splitClean(input)})
     const eU = expandGalaxyWithGrid(oU)
     // console.log(`original\n${oU.toString()}\nrows:${oU.rows} cols:${oU.cols}\n${JSON.stringify(findGalaxies(oU))}`)
     // console.log(`expanded\n${eU.toString()}\nrows:${eU.rows} cols:${eU.cols}\n${JSON.stringify(findGalaxies(eU))}`)
     const tU = new Grid({data: splitClean(expanded)})
     // console.log(`reference\n${tU.toString()}\nrows:${tU.rows} cols:${tU.cols}\n${JSON.stringify(findGalaxies(tU))}`)
-    const galaxyCoords = expandGalaxy(oU)
-    const distances = findDistances(galaxyCoords)
-    const part1 = distances.reduce((a, c) => a + c, 0)
-    return { part1, part2: 0 }
+    const part1 = findDistances(expandGalaxy(oU,1)).reduce((a, c) => a + c, 0)
+    const part2 = findDistances(expandGalaxy(oU,factor)).reduce((a, c) => a + c, 0)
+    return { part1, part2 }
 }

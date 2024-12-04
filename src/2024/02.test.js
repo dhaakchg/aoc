@@ -7,5 +7,5 @@ const primer = `7 6 4 2 1
 1 3 6 7 9`
 
 test('Day 2', () => {
-    expect(solution(primer)).toEqual({ part1: 'primer', part2: 'input' })
+    expect(solution(primer)).toEqual({ part1: 2, part2: 4 })
 })

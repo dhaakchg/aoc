@@ -87,6 +87,58 @@ class Grid {
     return range(0, this.cols - 1).map(col => this.getCol(col))
   }
 
+  getDiagonal(startRow, startCol, direction) {
+    const diagonal = []
+    let row = startRow
+    let col = startCol
+    while(this.coordInBounds(new GridCoord(row, col))) {
+      diagonal.push(this.get(new GridCoord(row, col)))
+      row += Math.sign(direction.row)
+      col += Math.sign(direction.col)
+    }
+    return diagonal
+  }
+
+  getRightToLeftDiags() {
+    /**
+     * S . X
+     * . X .
+     * X . F
+     */
+    const diags = []
+    // top left corner to main diagonal, top to bottom
+    for (let i = 0; i < this.cols; i++) {
+      const diag1 = this.getDiagonal(0, i, { row: 1, col: -1 })
+      diags.push(diag1)
+    }
+    // main diagonal to bottom right corner, top to bottom
+    for(let i = 1; i < this.rows; i++) {
+      const diag2 = this.getDiagonal(i, this.cols - 1, { row: 1, col: -1 })
+      diags.push(diag2)
+    }
+    return diags
+  }
+
+  getLeftToRightDiags() {
+    /**
+     * X . F
+     * . X .
+     * S . X
+     */
+    const diags = []
+    // bottom left corner to main diagonal
+    for (let i = this.rows - 1; i >= 0; i--) {
+      const diag1 = this.getDiagonal(i, 0, { row: 1, col: 1 })
+      diags.push(diag1)
+    }
+    // main diagonal to top right corner
+    for(let i = 1; i < this.cols; i++) {
+      const diag2 = this.getDiagonal(0, i, { row: 1, col: 1 })
+      diags.push(diag2)
+    }
+    return diags
+  }
+
   arePointsAdjacent(p1, p2) {
     /**
      *  x x x

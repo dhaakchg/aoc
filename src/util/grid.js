@@ -72,9 +72,7 @@ class Grid {
   }
 
   getRows() {
-    return range(0, this.rows - 1).map(r => {
-      return this.grid.slice(r * this.cols, (r * this.cols) + this.cols)
-    })
+    return range(0, this.rows - 1).map(row => this.getRow(row))
   }
 
   getCol(col) {
@@ -107,7 +105,7 @@ class Grid {
         (p2.row === p1.row - 1 && p2.col === p1.col - 1)    // NW
   }
 
-  getAdajcentByRadian(coord, radian, radius = 1) {
+  getAdjacentByRadian(coord, radian, radius = 1) {
     const row = coord.row + (radian === 0 ? 0 : Math.round(radius * Math.sin((radian / 4) * Math.PI))) // y-axis
     const col = coord.col + (radian === 0 ? 0 : Math.round(radius * Math.cos((radian / 4) * Math.PI))) // x-axis
     return new GridCoord(row, col)
@@ -120,7 +118,7 @@ class Grid {
     // W  O  E 4 0 8 -- Not entirely sure why this has to be reversed. Math.
     // SW S SE 3 2 1 -- positive values in relation to origin
     const radians = [[5, 6, 7], [4, 0, 8],  [3, 2, 1]] // start at NW corner 3/4pi
-    const adjacentCoords = radians.map(adjRow => adjRow.map(radian => this.getAdajcentByRadian(origin, radian, radius))
+    const adjacentCoords = radians.map(adjRow => adjRow.map(radian => this.getAdjacentByRadian(origin, radian, radius))
         // filter out of bounds coords.
         .filter(coord => this.coordInBounds(coord))
     )
@@ -133,7 +131,7 @@ class Grid {
     const dirs = { N: 6, W: 4, S: 2, E: 8 }
     const compass = { origin: { val: this.get(coord), coord } }
     for (const [dir, radian] of Object.entries(dirs)) {
-      const adj = this.getAdajcentByRadian(coord, radian)
+      const adj = this.getAdjacentByRadian(coord, radian)
       compass[dir] = { val: null, coord: null }
       if(this.coordInBounds(adj)) {
         compass[dir].val = this.get(adj)

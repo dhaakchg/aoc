@@ -1,30 +1,30 @@
 const {splitClean} = require("../util/inputUtils");
+let RULES = []
+let UPDATES = []
 
 const processInput = (input) => {
-    let rules = []
-    let updates = []
     const processed = splitClean(input)
     processed.forEach(line => {
-        if(line.match(/\d+\|/)) rules.push(line.split('|').map(Number))
-        if(line.match(/\d+,/)) updates.push(line.split(',').map(Number))
+        if(line.match(/\d+\|/)) RULES.push(line.split('|').map(Number))
+        if(line.match(/\d+,/)) UPDATES.push(line.split(',').map(Number))
     })
-    return { rules, updates }
 }
 
 const middlePage = (arr) => {
     return arr[Math.floor(arr.length / 2)]
 }
 
-const rulesForPage = (page, rules) => {
+const rulesForPage = (page) => {
     return {
-        rulesBefore: rules.filter(rule => page === rule[1]).map(rule => rule[0]),
-        rulesAfter: rules.filter(rule => page === rule[0]).map(rule => rule[1])
+        rulesBefore: RULES.filter(rule => page === rule[1]).map(rule => rule[0]),
+        rulesAfter: RULES.filter(rule => page === rule[0]).map(rule => rule[1])
     }
 }
 
-const updateInOrder = (rules, update) => {
+const updateInOrder = (update) => {
     for(let i = 0; i < update.length; i++) {
-        const { rulesBefore, rulesAfter } = rulesForPage(update[i], rules)
+        const currentPage = update[i]
+        const { rulesBefore, rulesAfter } = rulesForPage(currentPage)
         const pagesBefore = update.slice(0, i)
         const pagesAfter = update.slice(i + 1)
 
@@ -35,16 +35,38 @@ const updateInOrder = (rules, update) => {
     return true
 }
 
-const correctUpdate = (rules, update) => {
+function compareFn(a, b) {
+    const { rulesBefore, rulesAfter } = rulesForPage(a)
 
+    // if (a is less than b by some ordering criterion) {
+    //     return -1;
+    // } else if (a is greater than b by the ordering criterion) {
+    //     return 1;
+    // }
+    // // a must be equal to b
+    // return 0;
+}
+
+const correctUpdate = (update) => {
+    const correctOrder = []
+    for(let i = 0; i < update.length; i++) {
+        const currentPage = update[i]
+        const { rulesBefore, rulesAfter } = rulesForPage(currentPage)
+        const pagesBefore = update.slice(0, i)
+        const pagesAfter = update.slice(i + 1)
+        if( !pagesBefore.every(pb => rulesBefore.includes(pb)) || !pagesAfter.every(pa => rulesAfter.includes(pa)) ) { /* empty */ }
+        correctOrder.concat(rulesBefore)
+        correctOrder.push(currentPage)
+    }
+    return correctOrder
 }
 
 module.exports = (input) => {
-    const { rules, updates } = processInput(input)
-    const part1 = updates.filter(u => updateInOrder(rules, u))
+    processInput(input)
+    const part1 = UPDATES.filter(u => updateInOrder(u))
       .map(u => middlePage(u))
       .reduce((acc, curr) => acc + curr, 0)
-    const part2 = updates.filter(u => !updateInOrder(rules, u))
+    const part2 = UPDATES.filter(u => !updateInOrder(u))
       .map(u => correctUpdate(u))
       .map(u => middlePage(u))
       .reduce((acc, curr) => acc + curr, 0)

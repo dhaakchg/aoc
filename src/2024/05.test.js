@@ -29,5 +29,5 @@ const primer = `47|53
 97,13,75,29,47`
 
 test('Day 5', () => {
-    expect(solution(primer)).toEqual({ part1: 143, part2: 0 })
+    expect(solution(primer)).toEqual({ part1: 143, part2: 123 })
 })

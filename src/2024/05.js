@@ -36,29 +36,18 @@ const updateInOrder = (update) => {
 }
 
 function compareFn(a, b) {
-    const { rulesBefore, rulesAfter } = rulesForPage(a)
+    const { rulesBefore: rulesBeforeA, rulesAfter: rulesAfterA } = rulesForPage(a)
+    const { rulesBefore: rulesBeforeB, rulesAfter: rulesAfterB } = rulesForPage(b)
 
-    // if (a is less than b by some ordering criterion) {
-    //     return -1;
-    // } else if (a is greater than b by the ordering criterion) {
-    //     return 1;
-    // }
-    // // a must be equal to b
-    // return 0;
-}
-
-const correctUpdate = (update) => {
-    const correctOrder = []
-    for(let i = 0; i < update.length; i++) {
-        const currentPage = update[i]
-        const { rulesBefore, rulesAfter } = rulesForPage(currentPage)
-        const pagesBefore = update.slice(0, i)
-        const pagesAfter = update.slice(i + 1)
-        if( !pagesBefore.every(pb => rulesBefore.includes(pb)) || !pagesAfter.every(pa => rulesAfter.includes(pa)) ) { /* empty */ }
-        correctOrder.concat(rulesBefore)
-        correctOrder.push(currentPage)
+    if (rulesBeforeB.includes(a) || rulesAfterA.includes(b)) {
+        // a is less than b by some ordering criterion
+        return -1
+    } else if (rulesAfterB.includes(a) || rulesBeforeA.includes(b)) {
+        // a is greater than b by the ordering criterion
+        return 1
     }
-    return correctOrder
+    // a must be equal to b
+    return 0
 }
 
 module.exports = (input) => {
@@ -66,8 +55,9 @@ module.exports = (input) => {
     const part1 = UPDATES.filter(u => updateInOrder(u))
       .map(u => middlePage(u))
       .reduce((acc, curr) => acc + curr, 0)
+
     const part2 = UPDATES.filter(u => !updateInOrder(u))
-      .map(u => correctUpdate(u))
+      .map(u => u.toSorted(compareFn))
       .map(u => middlePage(u))
       .reduce((acc, curr) => acc + curr, 0)
     return { part1, part2 }

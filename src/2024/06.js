@@ -23,8 +23,8 @@ const rotateNinety = (guardValue) => {
     if(guardValue === '>') return 'v'
 }
 
-const getGuardFuturePath = (grid, guardCoord, distance = 1) => {
-    const { row, col } = getDirection(grid.get(guardCoord))
+const getGuardFuturePath = (grid, guardCoord, direction = null, distance = 1) => {
+    const { row, col } = getDirection(direction || grid.get(guardCoord))
     return new GridCoord(
       guardCoord.row + (row !== 0 ? row * distance : row),
       guardCoord.col + (col !== 0 ? col * distance : col)
@@ -64,6 +64,8 @@ const wouldLoop = (grid, guardCoord) => {
     return null
 }
 
+const positionOnPath = (path, coord) => path.find(p => p.row === coord.row && p.col === coord.col)
+
 const tracePath = (grid) => {
     const positions = []
     const possibleLoops = []
@@ -72,13 +74,13 @@ const tracePath = (grid) => {
     while(grid.coordInBounds(currGuardPos)) {
         console.log(`Guard at: ${currGuardPos.row}, ${currGuardPos.col}\n${grid.toString()}`)
         try {
-            const setBlock = wouldLoop(grid, currGuardPos)
-            if(setBlock !== null) {
-                console.log(`Loop detected at: ${currGuardPos.row}, ${currGuardPos.col}\n${grid.toString()}`)
-                possibleLoops.push(setBlock)
-            }
+            // const setBlock = wouldLoop(grid, currGuardPos)
+            // if(setBlock !== null) {
+            //     console.log(`Loop detected at: ${currGuardPos.row}, ${currGuardPos.col}\n${grid.toString()}`)
+            //     possibleLoops.push(setBlock)
+            // }
             let newGuardPos = moveGuard(currGuardPos, grid)
-            if(!positions.find(p => p.row === currGuardPos.row && p.col === currGuardPos.col)) {
+            if(!positionOnPath(positions, currGuardPos)) {
                 positions.push(currGuardPos)
             }
             currGuardPos = newGuardPos
@@ -89,8 +91,6 @@ const tracePath = (grid) => {
     }
     return { positions, possibleLoops }
 }
-
-const getDistinct = (grid) => grid.findAll('X').length + 1
 
 module.exports = (input) => {
     const { positions, possibleLoops } = tracePath(new Grid({data: splitClean(input)}))

@@ -33,11 +33,22 @@ const getGuardFuturePath = (grid, guardCoord, distance = 1) => {
 
 const moveGuard = (guardCoord, grid) => {
     let guardNextCoord = getGuardFuturePath(grid, guardCoord)
+    let rotated = false
+    let traceChar = grid.get(guardCoord)
     while(grid.get(guardNextCoord) === '#') {
         grid.set(guardCoord, rotateNinety(grid.get(guardCoord)))
         guardNextCoord = getGuardFuturePath(grid, guardCoord)
+        rotated = true
+    }
+    if(rotated) {
+        traceChar = '+'
+    } else if (getDirection(grid.get(guardCoord)).row !== 0) {
+        traceChar = '|'
+    } else if (getDirection(grid.get(guardCoord)).col !== 0) {
+        traceChar = '_'
     }
     grid.set(guardNextCoord, grid.get(guardCoord))
+    grid.set(guardCoord, traceChar)
     return guardNextCoord
 }
 

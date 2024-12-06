@@ -57,21 +57,28 @@ const wouldLoop = (grid, guardCoord, existingPath) => {
     const nextCoord = getGuardFuturePath(grid, guardCoord, newDir)
     let futurePath = []
     if(newDir === '^') {
-        futurePath = grid.getCol(nextCoord.col).slice(guardCoord.row, 0)
+        futurePath = grid.getCol(nextCoord.col).slice(0, guardCoord.row).reverse()
     } else if (newDir === '>') {
-        futurePath = grid.getRow(nextCoord.row).slice(guardCoord.col, grid.cols)
+        futurePath = grid.getRow(nextCoord.row).slice(guardCoord.col + 1, grid.cols)
     } else if (newDir === 'v') {
-        futurePath = grid.getCol(nextCoord.col).slice(guardCoord.row, grid.rows)
+        futurePath = grid.getCol(nextCoord.col).slice(guardCoord.row + 1, grid.rows)
     } else if (newDir === '<') {
-        futurePath = grid.getRow(nextCoord.row).slice(0, guardCoord.col)
+        futurePath = grid.getRow(nextCoord.row).slice(0, guardCoord.col).reverse()
     }
-    if(futurePath.some(p => p === '#') !== undefined && positionOnPath(existingPath, nextCoord)) {
+    // if([{ row: 6, col: 5 }, { row: 5, col: 6 }, { row: 5, col: 7}].map(c => guardCoord.isEqual(c)) ) {
+    //     console.log('hsould be a loop')
+    // }
+    // If the next coord is on the existing path and there exists an obstruction in the future path  && futurePath.some(p => p === '#')
+    const nextPositionOnPath = positionOnPath(existingPath, nextCoord)
+    const futurePathHasObstruction = futurePath.some(p => p === '#')
+    if(nextPositionOnPath && futurePathHasObstruction) {
+        console.log('should be a loop')
         return getGuardFuturePath(grid, guardCoord, grid.get(guardCoord), 2)
     }
     return null
 }
 
-const positionOnPath = (path, coord) => path.find(p => p.row === coord.row && p.col === coord.col)
+const positionOnPath = (path, coord) => path.find(p => p.row === coord.row && p.col === coord.col) !== undefined
 
 const tracePath = (grid) => {
     const guardPath = []

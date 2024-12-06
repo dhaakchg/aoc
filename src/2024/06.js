@@ -9,11 +9,11 @@ const findGuard = (grid) => {
     }
 }
 
-const getDirection = (guardValue, distance = 1) => {
-    if(guardValue === '^') return { row: -1 * distance, col: 0 }
-    if(guardValue === 'v') return { row: distance, col: 0 }
-    if(guardValue === '<') return { row: 0, col: -1 * distance }
-    if(guardValue === '>') return { row: 0, col: distance }
+const getDirection = (guardValue) => {
+    if(guardValue === '^') return { row: -1, col: 0 }
+    if(guardValue === 'v') return { row: 1, col: 0 }
+    if(guardValue === '<') return { row: 0, col: -1 }
+    if(guardValue === '>') return { row: 0, col: 1 }
 }
 
 const rotateNinety = (guardValue) => {
@@ -23,27 +23,34 @@ const rotateNinety = (guardValue) => {
     if(guardValue === '>') return 'v'
 }
 
+const getGuardFuturePath = (grid, guardCoord, distance = 1) => {
+    const { row, col } = getDirection(grid.get(guardCoord))
+    return new GridCoord(
+      guardCoord.row + (row !== 0 ? row * distance : row),
+      guardCoord.col + (col !== 0 ? col * distance : col)
+    )
+}
+
 const moveGuard = (guardCoord, grid) => {
-    let guardNextCoord = nextGuardPosition(grid, guardCoord)
+    let guardNextCoord = getGuardFuturePath(grid, guardCoord)
     while(grid.get(guardNextCoord) === '#') {
         grid.set(guardCoord, rotateNinety(grid.get(guardCoord)))
-        guardNextCoord = nextGuardPosition(grid, guardCoord)
+        guardNextCoord = getGuardFuturePath(grid, guardCoord)
     }
     grid.set(guardNextCoord, grid.get(guardCoord))
-    // grid.set(guardCoord, 'X')
     return guardNextCoord
 }
 
 const wouldLoop = (grid, guardCoord) => {
-    const nextCoord = nextGuardPosition(grid, guardCoord)
-    const possibleBlockCoord = nextGuardPosition(grid, nextCoord, 2)
-    return rotateNinety(grid.get(guardCoord)) === grid.get(nextCoord) &&
-      grid.get(possibleBlockCoord) !== '#'
-}
-
-const nextGuardPosition = (grid, guardCoord, distance = 1) => {
-    const { row, col } = getDirection(grid.get(guardCoord), distance)
-    return new GridCoord(guardCoord.row + row, guardCoord.col + col)
+    const nextCoord = getGuardFuturePath(grid, guardCoord)
+    const possibleBlockCoord = getGuardFuturePath(grid, guardCoord, 2)
+    if(rotateNinety(grid.get(guardCoord)) === grid.get(nextCoord) &&
+      grid.coordInBounds(possibleBlockCoord) &&
+      grid.get(possibleBlockCoord) !== '#') {
+        console.log(`Set block @${possibleBlockCoord.row}, ${possibleBlockCoord.col}`)
+        return possibleBlockCoord
+    }
+    return null
 }
 
 const tracePath = (grid) => {
@@ -52,17 +59,18 @@ const tracePath = (grid) => {
     let currGuardPos = findGuard(grid)
     positions.push(currGuardPos)
     while(grid.coordInBounds(currGuardPos)) {
+        console.log(`Guard at: ${currGuardPos.row}, ${currGuardPos.col}\n${grid.toString()}`)
         try {
-            // if(wouldLoop(grid, currGuardPos)) {
-            //     console.log(`Loop detected at: ${currGuardPos.row}, ${currGuardPos.col}\n${grid.toString()}`)
-            //     possibleLoops.push(nextGuardPosition(grid, currGuardPos))
-            // }
+            const setBlock = wouldLoop(grid, currGuardPos)
+            if(setBlock !== null) {
+                console.log(`Loop detected at: ${currGuardPos.row}, ${currGuardPos.col}\n${grid.toString()}`)
+                possibleLoops.push(setBlock)
+            }
             let newGuardPos = moveGuard(currGuardPos, grid)
             if(!positions.find(p => p.row === currGuardPos.row && p.col === currGuardPos.col)) {
                 positions.push(currGuardPos)
             }
             currGuardPos = newGuardPos
-            // console.log(`Guard at: ${currGuardPos.row}, ${currGuardPos.col}\n${grid.toString()}`)
         } catch (err) {
             // console.log(`Guard moved out of bounds at: ${guardPos.row}, ${guardPos.col}`)
             break
@@ -75,5 +83,6 @@ const getDistinct = (grid) => grid.findAll('X').length + 1
 
 module.exports = (input) => {
     const { positions, possibleLoops } = tracePath(new Grid({data: splitClean(input)}))
+    console.log(`${possibleLoops}`)
     return { part1: positions.length + 1, part2: possibleLoops.length }
 }

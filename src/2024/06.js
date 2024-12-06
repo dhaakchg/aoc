@@ -52,14 +52,21 @@ const moveGuard = (guardCoord, grid) => {
     return guardNextCoord
 }
 
-const wouldLoop = (grid, guardCoord) => {
-    const nextCoord = getGuardFuturePath(grid, guardCoord)
-    const possibleBlockCoord = getGuardFuturePath(grid, guardCoord, 2)
-    if(rotateNinety(grid.get(guardCoord)) === grid.get(nextCoord) &&
-      grid.coordInBounds(possibleBlockCoord) &&
-      grid.get(possibleBlockCoord) !== '#') {
-        console.log(`Set block @${possibleBlockCoord.row}, ${possibleBlockCoord.col}`)
-        return possibleBlockCoord
+const wouldLoop = (grid, guardCoord, existingPath) => {
+    const newDir = rotateNinety(grid.get(guardCoord))
+    const nextCoord = getGuardFuturePath(grid, guardCoord, newDir)
+    let futurePath = []
+    if(newDir === '^') {
+        futurePath = grid.getCol(nextCoord.col).slice(guardCoord.row, 0)
+    } else if (newDir === '>') {
+        futurePath = grid.getRow(nextCoord.row).slice(guardCoord.col, grid.cols)
+    } else if (newDir === 'v') {
+        futurePath = grid.getCol(nextCoord.col).slice(guardCoord.row, grid.rows)
+    } else if (newDir === '<') {
+        futurePath = grid.getRow(nextCoord.row).slice(0, guardCoord.col)
+    }
+    if(futurePath.some(p => p === '#') !== undefined && positionOnPath(existingPath, nextCoord)) {
+        return getGuardFuturePath(grid, guardCoord, grid.get(guardCoord), 2)
     }
     return null
 }
@@ -67,21 +74,21 @@ const wouldLoop = (grid, guardCoord) => {
 const positionOnPath = (path, coord) => path.find(p => p.row === coord.row && p.col === coord.col)
 
 const tracePath = (grid) => {
-    const positions = []
+    const guardPath = []
     const possibleLoops = []
     let currGuardPos = findGuard(grid)
-    positions.push(currGuardPos)
+    guardPath.push(currGuardPos)
     while(grid.coordInBounds(currGuardPos)) {
         console.log(`Guard at: ${currGuardPos.row}, ${currGuardPos.col}\n${grid.toString()}`)
         try {
-            // const setBlock = wouldLoop(grid, currGuardPos)
-            // if(setBlock !== null) {
-            //     console.log(`Loop detected at: ${currGuardPos.row}, ${currGuardPos.col}\n${grid.toString()}`)
-            //     possibleLoops.push(setBlock)
-            // }
+            const setBlock = wouldLoop(grid, currGuardPos, guardPath)
+            if(setBlock !== null) {
+                console.log(`Loop detected at: ${currGuardPos.row}, ${currGuardPos.col}\n${grid.toString()}`)
+                possibleLoops.push(setBlock)
+            }
             let newGuardPos = moveGuard(currGuardPos, grid)
-            if(!positionOnPath(positions, currGuardPos)) {
-                positions.push(currGuardPos)
+            if(!positionOnPath(guardPath, currGuardPos)) {
+                guardPath.push(currGuardPos)
             }
             currGuardPos = newGuardPos
         } catch (err) {
@@ -89,7 +96,7 @@ const tracePath = (grid) => {
             break
         }
     }
-    return { positions, possibleLoops }
+    return { positions: guardPath, possibleLoops }
 }
 
 module.exports = (input) => {

@@ -18,6 +18,13 @@ class Grid {
   as1dArray() {
     return [...this.grid]
   }
+
+  deepCopy() {
+    const tmp = new Grid({ rows: this.rows, cols: this.cols })
+    tmp.grid = this.as1dArray()
+    return tmp
+  }
+
   getIndex(coord) {
     if(this.coordInBounds(coord)) {
       return (coord.row * this.cols) + coord.col

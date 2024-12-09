@@ -87,17 +87,10 @@ const tracePath = (grid) => {
     return { positions: guardPath, loopDetected }
 }
 
-const part1 = (input) => {
-    const guardMap = new Grid({data: splitClean(input)})
-    const { positions } = tracePath(guardMap)
-    return positions.length + 1
-}
-
-const part2 = (input) => {
+const detectLoops = (guardMap, traversedPath) => {
     let loopsDetected = 0
-    const guardMap = new Grid({data: splitClean(input)})
     guardMap.findAll('.').forEach(coord => {
-        const obstacleGrid = new Grid({data: splitClean(input)})
+        const obstacleGrid = guardMap.deepCopy()
         obstacleGrid.set(coord, 'O')
         const { loopDetected } = tracePath(obstacleGrid)
         if (loopDetected) loopsDetected += 1
@@ -106,5 +99,8 @@ const part2 = (input) => {
 }
 
 module.exports = (input) => {
-    return { part1: part1(input), part2: part2(input) }
+    const { positions } = tracePath(new Grid({data: splitClean(input)}))
+    const part1 = positions.length + 1
+
+    return { part1, part2: detectLoops(new Grid({data: splitClean(input)}), positions) }
 }

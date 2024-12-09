@@ -63,14 +63,14 @@ const positionOnPath = (path, coord) => path.find(p => p.row === coord.row && p.
 
 const tracePath = (grid) => {
     const guardPath = []
-    let loopDeteced = false
+    let loopDetected = false
     let currGuardPos = findGuard(grid)
     guardPath.push(currGuardPos)
     while(grid.coordInBounds(currGuardPos)) {
         // console.log(`Guard at: ${currGuardPos.row}, ${currGuardPos.col}\n${grid.toString()}`)
         try {
-            loopDeteced = detectLoop(grid, currGuardPos, guardPath)
-            if(loopDeteced) {
+            loopDetected = detectLoop(grid, currGuardPos, guardPath)
+            if(loopDetected) {
                 console.log(`Loop detected at: ${currGuardPos.row}, ${currGuardPos.col}`)
                 break
             }
@@ -84,7 +84,7 @@ const tracePath = (grid) => {
             break
         }
     }
-    return { positions: guardPath, loopDeteced }
+    return { positions: guardPath, loopDetected }
 }
 
 const part1 = (input) => {
@@ -99,8 +99,8 @@ const part2 = (input) => {
     guardMap.findAll('.').forEach(coord => {
         const obstacleGrid = new Grid({data: splitClean(input)})
         obstacleGrid.set(coord, 'O')
-        const { loopDeteced } = tracePath(obstacleGrid)
-        if (loopDeteced) loopsDetected += 1
+        const { loopDetected } = tracePath(obstacleGrid)
+        if (loopDetected) loopsDetected += 1
     })
     return loopsDetected
 }

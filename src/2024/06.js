@@ -5,15 +5,15 @@ const GridCoord = require("../util/gridCoord");
 const findGuard = (grid) => {
     for(let possValue of ['^', '>', 'v', '<']) {
         const coord = grid.findValue(possValue)
-        if(coord) return coord
+        if(coord) return {...coord, dir: possValue }
     }
 }
 
-const getDirection = (guardValue) => {
-    if(guardValue === '^') return { row: -1, col: 0 }
-    if(guardValue === 'v') return { row: 1, col: 0 }
-    if(guardValue === '<') return { row: 0, col: -1 }
-    if(guardValue === '>') return { row: 0, col: 1 }
+const gridDirectionFromChar = (guardValue) => {
+    if(guardValue === '^') return { row: -1, col: 0, dir: guardValue }
+    if(guardValue === 'v') return { row: 1, col: 0, dir: guardValue }
+    if(guardValue === '<') return { row: 0, col: -1, dir: guardValue }
+    if(guardValue === '>') return { row: 0, col: 1, dir: guardValue }
 }
 
 const rotateNinety = (guardValue) => {
@@ -23,12 +23,13 @@ const rotateNinety = (guardValue) => {
     if(guardValue === '>') return 'v'
 }
 
-const getGuardFuturePath = (grid, guardCoord, direction = null, distance = 1) => {
-    const { row, col } = getDirection(direction || grid.get(guardCoord))
-    return new GridCoord(
+const getGuardFuturePath = (grid, guardCoord, distance = 1) => {
+    const { row, col, dir } = gridDirectionFromChar(grid.get(guardCoord))
+    const pathCoord = new GridCoord(
       guardCoord.row + (row !== 0 ? row * distance : row),
       guardCoord.col + (col !== 0 ? col * distance : col)
     )
+    return { ...pathCoord, dir }
 }
 
 const moveGuard = (guardCoord, grid) => {
@@ -42,43 +43,23 @@ const moveGuard = (guardCoord, grid) => {
     }
     if(rotated) {
         traceChar = '+'
-    } else if (getDirection(grid.get(guardCoord)).row !== 0) {
+    } else if (['^', 'v'].includes(guardNextCoord.dir)) {
         traceChar = '|'
-    } else if (getDirection(grid.get(guardCoord)).col !== 0) {
-        traceChar = '_'
+    } else if (['<', '>'].includes(guardNextCoord.dir)) {
+        traceChar = '-'
     }
     grid.set(guardNextCoord, grid.get(guardCoord))
     grid.set(guardCoord, traceChar)
     return guardNextCoord
 }
 
-const wouldLoop = (grid, guardCoord, existingPath) => {
-    const newDir = rotateNinety(grid.get(guardCoord))
-    const nextCoord = getGuardFuturePath(grid, guardCoord, newDir)
-    let futurePath = []
-    if(newDir === '^') {
-        futurePath = grid.getCol(nextCoord.col).slice(0, guardCoord.row).reverse()
-    } else if (newDir === '>') {
-        futurePath = grid.getRow(nextCoord.row).slice(guardCoord.col + 1, grid.cols)
-    } else if (newDir === 'v') {
-        futurePath = grid.getCol(nextCoord.col).slice(guardCoord.row + 1, grid.rows)
-    } else if (newDir === '<') {
-        futurePath = grid.getRow(nextCoord.row).slice(0, guardCoord.col).reverse()
-    }
-    // if([{ row: 6, col: 5 }, { row: 5, col: 6 }, { row: 5, col: 7}].map(c => guardCoord.isEqual(c)) ) {
-    //     console.log('hsould be a loop')
-    // }
-    // If the next coord is on the existing path and there exists an obstruction in the future path  && futurePath.some(p => p === '#')
-    const nextPositionOnPath = positionOnPath(existingPath, nextCoord)
-    const futurePathHasObstruction = futurePath.some(p => p === '#')
-    if(nextPositionOnPath && futurePathHasObstruction) {
-        console.log('should be a loop')
-        return getGuardFuturePath(grid, guardCoord, grid.get(guardCoord), 2)
-    }
-    return null
+const detectLoop = (grid, guardCoord, existingPath) => {
+    const guardOnPath = positionOnPath(existingPath, guardCoord)
+    // coordinate is on the existing path and the guard is facing the same direction
+    return guardOnPath !== undefined && existingPath.length > 1 && guardOnPath.dir === guardCoord.dir
 }
 
-const positionOnPath = (path, coord) => path.find(p => p.row === coord.row && p.col === coord.col) !== undefined
+const positionOnPath = (path, coord) => path.find(p => p.row === coord.row && p.col === coord.col)
 
 const tracePath = (grid) => {
     const guardPath = []
@@ -88,10 +69,9 @@ const tracePath = (grid) => {
     while(grid.coordInBounds(currGuardPos)) {
         console.log(`Guard at: ${currGuardPos.row}, ${currGuardPos.col}\n${grid.toString()}`)
         try {
-            const setBlock = wouldLoop(grid, currGuardPos, guardPath)
-            if(setBlock !== null) {
-                console.log(`Loop detected at: ${currGuardPos.row}, ${currGuardPos.col}\n${grid.toString()}`)
-                possibleLoops.push(setBlock)
+            if(detectLoop(grid, currGuardPos, guardPath)) {
+                console.log(`Loop detected at: ${currGuardPos.row}, ${currGuardPos.col}`)
+                break
             }
             let newGuardPos = moveGuard(currGuardPos, grid)
             if(!positionOnPath(guardPath, currGuardPos)) {
@@ -99,15 +79,19 @@ const tracePath = (grid) => {
             }
             currGuardPos = newGuardPos
         } catch (err) {
-            // console.log(`Guard moved out of bounds at: ${guardPos.row}, ${guardPos.col}`)
+            console.log(`Guard moved out of bounds at: ${currGuardPos.row}, ${currGuardPos.col}`)
             break
         }
     }
     return { positions: guardPath, possibleLoops }
 }
 
+const part1 = (input) => {
+    const guardMap = new Grid({data: splitClean(input)})
+    const { positions } = tracePath(guardMap)
+    return positions.length + 1
+}
+
 module.exports = (input) => {
-    const { positions, possibleLoops } = tracePath(new Grid({data: splitClean(input)}))
-    console.log(`${possibleLoops}`)
-    return { part1: positions.length + 1, part2: possibleLoops.length }
+    return { part1: part1(input), part2: 0 }
 }

@@ -77,14 +77,14 @@ const tracePath = (grid) => {
         try {
             loopDetected = detectLoop(grid, currGuardPos, guardPath)
             if(loopDetected) {
-                console.log(`Loop detected at: ${currGuardPos.row}, ${currGuardPos.col}\n${grid.toString()}`)
+                // console.log(`Loop detected at: ${currGuardPos.row}, ${currGuardPos.col}`)
                 break
             }
             let newGuardPos = moveGuard(currGuardPos, grid)
             addToPath(guardPath, currGuardPos)
             currGuardPos = newGuardPos
         } catch (err) {
-            console.log(`Guard moved out of bounds at: ${currGuardPos.row}, ${currGuardPos.col}\n${grid.toString()}`)
+            // console.log(`Guard moved out of bounds at: ${currGuardPos.row}, ${currGuardPos.col}`)
             addToPath(guardPath, currGuardPos)
             break
         }
@@ -94,17 +94,15 @@ const tracePath = (grid) => {
 
 const detectLoops = (guardMap, traversedPath) => {
     let loopsDetected = 0
-    // const pathObstacles = traversedPath.map(coord => {
-    //     const { row, col} = gridDirectionFromChar(coord.dir)
-    //     return new GridCoord(row + coord.row, col + coord.col)
-    // }).filter(coord => guardMap.coordInBounds(coord) &&
-    //   guardMap.get(coord) === '.')
-    guardMap.findAll('.').forEach(coord => {
+    const pathObstacles = traversedPath.slice(1)
+    // const pathObstacles = guardMap.findAll('.')
+    pathObstacles.forEach((coord, i, a) => {
         const obstacleGrid = guardMap.deepCopy()
         obstacleGrid.set(coord, 'O')
-        console.log(`Obstacle set at: ${coord.row}, ${coord.col}\n${obstacleGrid.toString()}`)
-        const { loopDetected } = tracePath(obstacleGrid)
+        // console.log(`Obstacle set at: ${coord.row}, ${coord.col}\n${obstacleGrid.toString()}`)
+        const { positions, loopDetected } = tracePath(obstacleGrid)
         if (loopDetected) loopsDetected += 1
+        console.log(`${i + 1}/${a.length}: Obstacle set at: ${coord.row}, ${coord.col}, unique positions: ${positions.length}, loop detected: ${loopDetected}, loops: ${loopsDetected}`)
     })
     return loopsDetected
 }

@@ -36,7 +36,7 @@ const moveGuard = (guardCoord, grid) => {
     let guardNextCoord = getGuardFuturePath(grid, guardCoord)
     let rotated = false
     let traceChar = grid.get(guardCoord)
-    while(grid.get(guardNextCoord) === '#') {
+    while(['#', 'O'].includes(grid.get(guardNextCoord))) {
         grid.set(guardCoord, rotateNinety(grid.get(guardCoord)))
         guardNextCoord = getGuardFuturePath(grid, guardCoord)
         rotated = true
@@ -63,13 +63,14 @@ const positionOnPath = (path, coord) => path.find(p => p.row === coord.row && p.
 
 const tracePath = (grid) => {
     const guardPath = []
-    const possibleLoops = []
+    let loopDeteced = false
     let currGuardPos = findGuard(grid)
     guardPath.push(currGuardPos)
     while(grid.coordInBounds(currGuardPos)) {
-        console.log(`Guard at: ${currGuardPos.row}, ${currGuardPos.col}\n${grid.toString()}`)
+        // console.log(`Guard at: ${currGuardPos.row}, ${currGuardPos.col}\n${grid.toString()}`)
         try {
-            if(detectLoop(grid, currGuardPos, guardPath)) {
+            loopDeteced = detectLoop(grid, currGuardPos, guardPath)
+            if(loopDeteced) {
                 console.log(`Loop detected at: ${currGuardPos.row}, ${currGuardPos.col}`)
                 break
             }
@@ -79,11 +80,11 @@ const tracePath = (grid) => {
             }
             currGuardPos = newGuardPos
         } catch (err) {
-            console.log(`Guard moved out of bounds at: ${currGuardPos.row}, ${currGuardPos.col}`)
+            // console.log(`Guard moved out of bounds at: ${currGuardPos.row}, ${currGuardPos.col}`)
             break
         }
     }
-    return { positions: guardPath, possibleLoops }
+    return { positions: guardPath, loopDeteced }
 }
 
 const part1 = (input) => {
@@ -92,6 +93,18 @@ const part1 = (input) => {
     return positions.length + 1
 }
 
+const part2 = (input) => {
+    let loopsDetected = 0
+    const guardMap = new Grid({data: splitClean(input)})
+    guardMap.findAll('.').forEach(coord => {
+        const obstacleGrid = new Grid({data: splitClean(input)})
+        obstacleGrid.set(coord, 'O')
+        const { loopDeteced } = tracePath(obstacleGrid)
+        if (loopDeteced) loopsDetected += 1
+    })
+    return loopsDetected
+}
+
 module.exports = (input) => {
-    return { part1: part1(input), part2: 0 }
+    return { part1: part1(input), part2: part2(input) }
 }

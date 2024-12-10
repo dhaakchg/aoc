@@ -40,9 +40,11 @@ class Grid {
   colInbounds(col) {
     return (0 <= col && col < this.cols)
   }
+
   coordInBounds(coord) {
     return this.rowInBounds(coord.row) && this.colInbounds(coord.col)
   }
+
   getRowColFromIndex(index) {
     return new GridCoord(Math.floor(index / this.cols), index % this.cols)
   }

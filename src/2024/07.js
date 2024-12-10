@@ -43,25 +43,15 @@ const eval2 = (equation) => {
 module.exports = (input) => {
     const equations = getEquations(input)
 
-    const part1 = equations
+    const [part1, part2] = [['+', '*'], ['+', '*', '||']].map(operators => equations
       .map(({ testValue, operands }) => {
           return {
               testValue,
-              perms: generatePermutations(operands, ['+', '*']).map(perm => eval2(perm))
+              perms: generatePermutations(operands, operators).map(perm => eval2(perm))
           }
       })
       .filter(({ testValue, perms }) => perms.includes(testValue))
-      .reduce((acc, curr) => acc + curr.testValue, 0)
-
-    const part2 = equations
-      .map(({ testValue, operands }) => {
-          return {
-              testValue,
-              perms: generatePermutations(operands, ['+', '*', '||']).map(perm => eval2(perm))
-          }
-      })
-      .filter(({ testValue, perms }) => perms.includes(testValue))
-      .reduce((acc, curr) => acc + curr.testValue, 0)
+      .reduce((acc, curr) => acc + curr.testValue, 0))
 
     return { part1, part2 }
 }

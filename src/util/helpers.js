@@ -18,6 +18,23 @@ const Helpers = {
         yield [array[i], ...c];
       }
     }
+  },
+  permutate: (items, count) => {
+    const results = []
+
+    req([])
+
+    return results
+
+    function req(array) {
+      if (array.length === count) {
+        results.push(array)
+        return
+      }
+      for (const item of items) {
+        req(array.concat(item))
+      }
+    }
   }
 }
 

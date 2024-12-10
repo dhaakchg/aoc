@@ -21,16 +21,23 @@ function generatePermutations(operands, operators) {
     })
 }
 
-const evaluate = (equation) => {
-    let result = equation[0]
-    for(let i = 1; i < equation.length; i += 2) {
-        if(equation[i] === '+') {
-            result += equation[i + 1]
-        } else if(equation[i] === '*') {
-            result *= equation[i + 1]
+const eval2 = (equation) => {
+    const stack = [...equation]
+    stack.reverse()
+
+    while(stack.length > 1) {
+        const lhs = stack.pop()
+        const operator = stack.pop()
+        const rhs = stack.pop()
+        if(operator === '+') {
+            stack.push(lhs + rhs)
+        } else if (operator === '*') {
+            stack.push(lhs * rhs)
+        } else if (operator === '||') {
+            stack.push(Number(`${lhs}${rhs}`))
         }
     }
-    return result
+    return stack[0]
 }
 
 module.exports = (input) => {
@@ -40,7 +47,7 @@ module.exports = (input) => {
       .map(({ testValue, operands }) => {
           return {
               testValue,
-              perms: generatePermutations(operands, ['+', '*']).map(perm => evaluate(perm))
+              perms: generatePermutations(operands, ['+', '*']).map(perm => eval2(perm))
           }
       })
       .filter(({ testValue, perms }) => perms.includes(testValue))
@@ -50,9 +57,11 @@ module.exports = (input) => {
       .map(({ testValue, operands }) => {
           return {
               testValue,
-              perms: generatePermutations(operands, ['+', '*', '||'])
+              perms: generatePermutations(operands, ['+', '*', '||']).map(perm => eval2(perm))
           }
       })
+      .filter(({ testValue, perms }) => perms.includes(testValue))
+      .reduce((acc, curr) => acc + curr.testValue, 0)
 
-    return { part1, part2: 0 }
+    return { part1, part2 }
 }

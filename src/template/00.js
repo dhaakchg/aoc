@@ -1,4 +1,4 @@
-const {splitClean} = require("../util/inputUtils");
+const {splitClean} = require('../util/inputUtils')
 
 module.exports = (input) => {
     const [part1, part2] = splitClean(input)

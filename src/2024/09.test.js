@@ -1,7 +1,6 @@
-const solution = require('./00')
-const primer = `primer
-input`
+const solution = require('./09')
+const primer = `2333133121414131402`
 
-test('Day 0', () => {
-    expect(solution(primer)).toEqual({ part1: 'primer', part2: 'input' })
+test('Day 9', () => {
+    expect(solution(primer)).toEqual({ part1: 1928, part2: 'input' })
 })

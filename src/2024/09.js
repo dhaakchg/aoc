@@ -1,13 +1,13 @@
 const getDiskMap = (input) => {
-    const files = new Map()
+    const files = []
     const diskMap = []
     const parsed = [...input.matchAll(/(?<blocks>\d)(?<free>\d?)/g)].map(m => m.groups)
     parsed.forEach((group, diskId) => {
         const { blocks, free } = group
-        const fileblocks = parseInt(blocks)
+        const size = parseInt(blocks)
         const freeBlocks = parseInt(free) || 0
-        files.set(diskId, { fileblocks })
-        for(let i = 0; i < fileblocks; i++) {
+        files.push({ diskId, size })
+        for(let i = 0; i < size; i++) {
             diskMap.push(diskId)
         }
         for(let j = 0; j < freeBlocks; j++) {
@@ -15,6 +15,14 @@ const getDiskMap = (input) => {
         }
     })
     return { diskMap, files }
+}
+
+const findFree = (diskMap) => {
+    const freeChunks = [];
+    [...diskMap.join('').matchAll(/\.+/g)].forEach(m => {
+        freeChunks.push({ startBlock: m.index, size: m[0].length })
+    })
+    return freeChunks
 }
 
 const compact = (diskMap) => {
@@ -31,6 +39,26 @@ const compact = (diskMap) => {
     return compacted
 }
 
+const compact2 = (diskMap, files) => {
+    const compacted = [...diskMap]
+    files.toReversed().forEach((file) => {
+        const freeChunks = findFree(compacted)
+        const fileStart = compacted.findIndex(b => b === file.diskId)
+        const chunk = freeChunks.find(chunk => chunk.startBlock < fileStart && chunk.size >= file.size)
+        if(chunk) {
+            // change file to free
+            for(let i = fileStart; i < fileStart + file.size; i++) {
+                compacted[i] = '.'
+            }
+            // change free to file
+            for(let i = chunk.startBlock; i < chunk.startBlock + file.size; i++) {
+                compacted[i] = file.diskId
+            }
+        }
+    })
+    return compacted
+}
+
 const checksum = (diskMap) => {
     const blockSums = []
     diskMap.forEach((block, idx) => {
@@ -42,7 +70,8 @@ const checksum = (diskMap) => {
 }
 
 module.exports = (input) => {
-    const { diskMap } = getDiskMap(input)
+    const { diskMap, files } = getDiskMap(input)
     const compacted = compact(diskMap)
-    return { part1: checksum(compacted), part2: 0 }
+    const compacted2 = compact2(diskMap, files)
+    return { part1: checksum(compacted), part2: checksum(compacted2) }
 }

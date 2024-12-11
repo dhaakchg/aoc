@@ -35,6 +35,12 @@ const Helpers = {
         req(array.concat(item))
       }
     }
+  },
+  timeFn: (fn, ...fnArgs) => {
+    const start = performance.now()
+    const fnResult = fn(...fnArgs)
+    const fnMs = (performance.now() - start).toFixed(3)
+    return { fnResult, fnMs }
   }
 }
 

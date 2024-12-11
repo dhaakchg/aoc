@@ -35,9 +35,41 @@ const freqAntinodes = (antennas, grid) => {
   return antinodes
 }
 
+const freqAntinodes2 = (antennas, grid) => {
+  const antinodes = new Set()
+  for(let [_freq, coords] of Object.entries(antennas)) {
+    for (const [p1, p2] of combinationN(coords, 2)) {
+      antinodes.add(`${p1.row},${p1.col}`)
+      antinodes.add(`${p2.row},${p2.col}`)
+      const dr = p2.row - p1.row
+      const dc = p2.col - p1.col
+      let a1 = new GridCoord(p1.row, p1.col)
+      let a2 = new GridCoord(p2.row, p2.col)
+      do {
+        a1 = new GridCoord(a1.row - dr, a1.col - dc)
+        if(grid.coordInBounds(a1)) {
+          antinodes.add(`${a1.row},${a1.col}`)
+          // grid.set(a1, '#')
+          // console.log(`Set antinode @${a1}\n${grid.toString()}`)
+        }
+      } while(grid.coordInBounds(a1))
+      do {
+        a2 = new GridCoord(a2.row + dr, a2.col + dc);
+        if(grid.coordInBounds(a2)) {
+          antinodes.add(`${a2.row},${a2.col}`)
+          // grid.set(a2, '#')
+          // console.log(`Set antinode @${a2}\n${grid.toString()}`)
+        }
+      } while (grid.coordInBounds(a2))
+    }
+  }
+  return antinodes
+}
+
 module.exports = (input) => {
   const antennaMap = new Grid({data: splitClean(input)})
   const antennas = getAntennas(antennaMap)
   const antinodes = freqAntinodes(antennas, antennaMap)
-  return { part1: antinodes.size, part2: 0 }
+  const antinodes2 = freqAntinodes2(antennas, antennaMap)
+  return { part1: antinodes.size, part2: antinodes2.size }
 }

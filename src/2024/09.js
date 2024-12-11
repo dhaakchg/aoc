@@ -19,9 +19,18 @@ const getDiskMap = (input) => {
 
 const findFree = (diskMap) => {
     const freeChunks = [];
-    [...diskMap.join('').matchAll(/\.+/g)].forEach(m => {
-        freeChunks.push({ startBlock: m.index, size: m[0].length })
-    })
+    let i = 0
+    while(i < diskMap.length) {
+        let startBlock = -1
+        if(diskMap[i] === '.') {
+            startBlock = i
+            while(diskMap[i] === '.') {
+                i++
+            }
+            freeChunks.push({ startBlock, size: i - startBlock })
+        }
+        i++
+    }
     return freeChunks
 }
 

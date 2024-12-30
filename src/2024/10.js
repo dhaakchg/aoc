@@ -1,6 +1,90 @@
 const {splitClean} = require("../util/inputUtils");
+const Grid = require("../util/grid")
+
+const findTrailheads = (grid) => grid.findAll(0)
+
+const validPointSteps = (compass) => {
+    return Object.keys(compass).filter(key => key !== 'origin').reduce((acc, dir) => {
+        if(compass[dir].val !== null && compass[dir].val === compass.origin.val + 1) {
+            acc.push(compass[dir].coord)
+        }
+        return acc
+    }, [])
+}
+
+const heightIsGoal = (coord, grid) => grid.get(coord) === 9
+
+const pointInTrail = (coord, trail) => trail.has(coord.toString())
+
+const exploreTrailhead = (grid, trailheadCoord) => {
+    const trails = []
+    let stickyStack = [{ coord: trailheadCoord, trail: new Set([trailheadCoord.toString()]) }] // stack
+    while (stickyStack.length) {
+        const { coord: currentCoord, trail: currentTrail }  = stickyStack.pop()
+        // if the current coord is not in the trail, add it.
+        if(!pointInTrail(currentCoord, currentTrail)) {
+            currentTrail.add(currentCoord.toString())
+        }
+        // if the current coord is the end, add the trail to the trails
+        if( heightIsGoal(currentCoord, grid) ) {
+            console.log('found the end, adding trail')
+            console.log(printTrail(grid, currentTrail).toString())
+            trails.push(currentTrail)
+        }
+        let compass = grid.getCardinalDirsFromPoint(currentCoord)
+        const possibleSteps = validPointSteps(compass)
+        if (possibleSteps.length > 0) {
+            possibleSteps.forEach(step => {
+                const stepValue = grid.get(step)
+                console.log(`step: ${step} value: ${stepValue}`)
+                if(!pointInTrail(step, currentTrail)) {
+                    stickyStack.push({ coord: step, trail: currentTrail })
+                }
+            })
+        } else {
+            // trail has ended early
+            console.log('no more steps')
+            console.log(printTrail(grid, currentTrail).toString())
+        }
+    }
+    return trails
+}
+
+const printTrail = (grid, trail) => {
+    const trailGrid = new Grid({ rows: grid.rows, cols: grid.cols });
+    [...trail].forEach(coord => {
+        const [ row, col ] = coord.split(',').map(Number)
+        trailGrid.set({ row, col }, grid.get({ row, col }))
+    })
+    return trailGrid
+}
+// 89010123
+// 78121874
+// 87430965
+// 96549874
+// 45678903
+// 32019012
+// 01329801
+// 10456732
+
+
+// for each trailhead
+// check each adjacent cell.
+//  if sequential from 0, start a new trail
+//
+// tracepath(grid, trailheadCoord, currenttrail)
+// check each adjacent cell from current coordinate
+// if cell is a step, add it to the current trail, and move to that cell
+// if there are no more cells, return the trail
+
 
 module.exports = (input) => {
-    const [part1, part2] = splitClean(input)
-    return { part1, part2 }
+    const topo = new Grid({ data: splitClean(input), primitiveType: Number })
+    const trailHeads = findTrailheads(topo)
+    const part1 = trailHeads.map(trailHead => {
+        const trails = exploreTrailhead(topo, trailHead)
+        console.log(trails)
+        return trails.length
+    }).reduce((curr, acc) => curr + acc)
+    return { part1, part2: 0 }
 }

@@ -2,11 +2,11 @@ const {range} = require("./helpers");
 const GridCoord = require('./gridCoord')
 
 class Grid {
-  constructor({ data, rows, cols, fill = '.', subGridOrigin = { row: 0, col: 0 } }) {
+  constructor({ data, rows, cols, fill = '.', primitiveType = String, subGridOrigin = { row: 0, col: 0 } }) {
     if(data && data.length > 0 && data[0].length > 0) {
       this.rows = data.length
       this.cols = data[0].length
-      this.grid = data.map(row => row.split('')).flat()
+      this.grid = data.map(row => row.split('')).flat().map(primitiveType)
     } else {
       this.rows = rows
       this.cols = cols

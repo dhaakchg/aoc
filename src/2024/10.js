@@ -32,9 +32,10 @@ const exploreTrailhead = (grid, trailheadCoord) => {
         const possibleSteps = validPointSteps(compass)
         if (possibleSteps.length > 0) {
             possibleSteps.forEach(step => {
-                if(!pointHasBeenVisited(step, trails)) {
+                // this will dedup, solved part2 first :/
+                // if(!pointHasBeenVisited(step, trails)) {
                     stickyStack.push({ coord: step, trail: currentTrail })
-                }
+                // }
             })
         }
     }
@@ -72,10 +73,14 @@ const printTrail = (grid, trail) => {
 module.exports = (input) => {
     const topo = new Grid({ data: splitClean(input), primitiveType: Number })
     const trailHeads = findTrailheads(topo)
-    const part1 = trailHeads.map(trailHead => {
+    let part1 = 0
+    let part2 = 0
+    trailHeads.map(trailHead => {
         const trails = exploreTrailhead(topo, trailHead)
-        console.log(trails)
-        return trails.length
-    }).reduce((curr, acc) => curr + acc)
-    return { part1, part2: 0 }
+        const distinctSummits = new Set(trails.map(trail => Array.from(trail)[trail.size - 1]))
+        console.log(`Trailhead: ${trailHead.toString()}, summits: ${distinctSummits.size}`)
+        part1 += distinctSummits.size
+        part2 += trails.length
+    })
+    return { part1, part2 }
 }

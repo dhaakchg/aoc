@@ -14,37 +14,28 @@ const validPointSteps = (compass) => {
 
 const heightIsGoal = (coord, grid) => grid.get(coord) === 9
 
-const pointInTrail = (coord, trail) => trail.has(coord.toString())
+const pointHasBeenVisited = (coord, trails) => trails.reduce((acc, trail) => {
+    return acc || trail.has(coord.toString())
+}, false)
 
 const exploreTrailhead = (grid, trailheadCoord) => {
     const trails = []
-    let stickyStack = [{ coord: trailheadCoord, trail: new Set([trailheadCoord.toString()]) }] // stack
+    let stickyStack = [{ coord: trailheadCoord, trail: new Set() }] // stack
     while (stickyStack.length) {
-        const { coord: currentCoord, trail: currentTrail }  = stickyStack.pop()
-        // if the current coord is not in the trail, add it.
-        if(!pointInTrail(currentCoord, currentTrail)) {
-            currentTrail.add(currentCoord.toString())
-        }
+        const { coord: currentCoord, trail }  = stickyStack.pop()
+        const currentTrail = new Set([...trail, currentCoord.toString()])
         // if the current coord is the end, add the trail to the trails
         if( heightIsGoal(currentCoord, grid) ) {
-            console.log('found the end, adding trail')
-            console.log(printTrail(grid, currentTrail).toString())
             trails.push(currentTrail)
         }
         let compass = grid.getCardinalDirsFromPoint(currentCoord)
         const possibleSteps = validPointSteps(compass)
         if (possibleSteps.length > 0) {
             possibleSteps.forEach(step => {
-                const stepValue = grid.get(step)
-                console.log(`step: ${step} value: ${stepValue}`)
-                if(!pointInTrail(step, currentTrail)) {
+                if(!pointHasBeenVisited(step, trails)) {
                     stickyStack.push({ coord: step, trail: currentTrail })
                 }
             })
-        } else {
-            // trail has ended early
-            console.log('no more steps')
-            console.log(printTrail(grid, currentTrail).toString())
         }
     }
     return trails

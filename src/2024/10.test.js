@@ -19,5 +19,5 @@ const primer = `89010123
 // if the previous coord is not in the trail, start a new trail.
 
 test('Day 10', () => {
-    expect(solution(primer)).toEqual({ part1: 36, part2: 0 })
+    expect(solution(primer)).toEqual({ part1: 36, part2: 81 })
 })

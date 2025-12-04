@@ -16,7 +16,6 @@ const isIdInvalid1 = (id) => {
 
 const isIdInvalid2 = (id) => {
   const idStr = id.toString()
-  // if(idStr.split('').every(c => c === idStr[0])) return true // all same digits are invalid
   for(let s = idStr.length / 2; s >= 1; s--) {
     const chunk = idStr.slice(0, s)
     const re = new RegExp(String.raw`^(?:${chunk}){2,}$`, "g");

@@ -16,7 +16,8 @@
     "2023": "npm run aoc 2023",
     "2024": "npm run aoc 2024",
     "2025": "npm run aoc 2025",
-    "test": "jest"
+    "current": "npm run aoc $(ls -1tr src/*/[0-9][0-9].js | tail -1 | sed -e 's#/# #g' -e 's/.js//g' | awk '{print $2,$3}')",
+    "test:current": "jest --verbose --runTestsByPath $(ls -1tr src/*/[0-9][0-9].test.js | tail -1)"
   },
   "devDependencies": {
     "@types/jest": "^29.2.5",

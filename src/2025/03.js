@@ -1,21 +1,24 @@
 const {splitClean} = require('../util/inputUtils')
 
-const getBestBatteries = (bank) => {
-  let firstBatteryIndex = 0
-  let firstBattery = Number.parseInt(bank[firstBatteryIndex])
-  bank.slice(0, bank.length - 1).split('').map(Number).forEach((b, index) => {
-    if(b > firstBattery) {
-      firstBatteryIndex = index
-      firstBattery = b
+const getBestBatteries = (bank, batteriesToFind) => {
+  const bankAsNumbers = bank.split('').map(Number)
+  const bestBatteries = []
+  let bestBatteryIndex = 0
+  let startIndex = 0
+  let endIndex = bank.length - batteriesToFind + 1
+  for (let b = 0; b < batteriesToFind; b++) {
+    bestBatteryIndex = startIndex
+    for(let i = startIndex; i < endIndex; i++) {
+      if(bankAsNumbers[i] > bankAsNumbers[bestBatteryIndex]) {
+        bestBatteryIndex = i
+      }
     }
-  })
-  let secondBattery = Number.parseInt(bank[firstBatteryIndex + 1])
-  bank.slice(firstBatteryIndex + 1, bank.length).split('').map(Number).forEach(b => {
-    if(b > secondBattery) {
-      secondBattery = b
-    }
-  })
-  return Number.parseInt(`${firstBattery}${secondBattery}`)
+    bestBatteries.push(bankAsNumbers[bestBatteryIndex])
+    startIndex = bestBatteryIndex + 1
+    endIndex++
+  }
+
+  return Number.parseInt(bestBatteries.join(''))
 }
 
 module.exports = (input) => {
@@ -23,7 +26,8 @@ module.exports = (input) => {
   let part2 = 0
   const banks = splitClean(input)
   banks.map(bank => {
-    part1 += getBestBatteries(bank)
+    part1 += getBestBatteries(bank, 2)
+    part2 += getBestBatteries(bank, 12)
   })
   return { part1, part2 }
 }

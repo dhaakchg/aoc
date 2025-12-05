@@ -10,6 +10,7 @@
   },
   "scripts": {
     "lint": "eslint .",
+    "create-day": "node bin/initNewPuzzleDay.js",
     "aoc": "node ./src/index.js",
     "2022": "npm run aoc 2022",
     "2023": "npm run aoc 2023",

@@ -2,7 +2,7 @@ const {range} = require("./helpers");
 const GridCoord = require('./gridCoord')
 
 class Grid {
-  constructor({ data, rows, cols, fill = '.', primitiveType = String, subGridOrigin = { row: 0, col: 0 } }) {
+  constructor({ data, rows, cols, fill = '.', primitiveType = String }) {
     if(data && data.length > 0 && data[0].length > 0) {
       this.rows = data.length
       this.cols = data[0].length
@@ -12,7 +12,6 @@ class Grid {
       this.cols = cols
       this.grid = new Array(this.rows * this.cols).fill(fill)
     }
-    this.subGridOrigin = subGridOrigin
   }
 
   as1dArray() {
@@ -182,14 +181,18 @@ class Grid {
     const adjacentCoords = radians.map(adjRow => adjRow.map(radian => this.getAdjacentByRadian(origin, radian, radius))
         // filter out of bounds coords.
         .filter(coord => this.coordInBounds(coord))
-    )
+    ).filter(adjRow => adjRow.length > 0)
     // Gross.
     const data = adjacentCoords.map(adjRow => adjRow.map(coord => this.get(coord)).join(''))
-    return new Grid({ data, subGridOrigin: adjacentCoords.at(0).at(0) })
+    return new Grid({ data })
   }
 
   getCardinalDirsFromPoint(coord) {
-    const dirs = { N: 6, W: 4, S: 2, E: 8 }
+    const dirs = {
+      NW: 5, N: 6, NE: 7,
+      W: 4,        E: 8,
+      SW: 3, S: 2, SE: 1
+    }
     const compass = { origin: { val: this.get(coord), coord } }
     for (const [dir, radian] of Object.entries(dirs)) {
       const adj = this.getAdjacentByRadian(coord, radian)

@@ -10,7 +10,7 @@
   },
   "scripts": {
     "lint": "eslint .",
-    "create-day": "node bin/initNewPuzzleDay.js",
+    "create-next-day": "node bin/initNewPuzzleDay.js $(ls -1tr src/*/[0-9][0-9].js | tail -1 | sed -e 's#/# #g' -e 's/.js//g' | awk '{print $2, $3 + 1}')",
     "aoc": "node ./src/index.js",
     "2022": "npm run aoc 2022",
     "2023": "npm run aoc 2023",

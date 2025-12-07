@@ -2,15 +2,23 @@ const {range} = require("./helpers");
 const GridCoord = require('./gridCoord')
 
 class Grid {
-  constructor({ data, rows, cols, fill = '.', primitiveType = String }) {
-    if(data && data.length > 0 && data[0].length > 0) {
+  constructor({ data, rows, cols, fillChar = '.', primitiveType = String }) {
+    if(Array.isArray(data) && typeof data[0] === 'string') {
       this.rows = data.length
       this.cols = data[0].length
       this.grid = data.map(row => row.split('')).flat().map(primitiveType)
+    } else if (Array.isArray(data) && Array.isArray(data[0])) {
+      this.rows = rows
+      this.cols = cols
+      this.grid = data.flat()
+    } else if (!data && rows && cols) {
+      this.rows = rows
+      this.cols = cols
+      this.grid = new Array(this.rows * this.cols).fill(fillChar)
     } else {
       this.rows = rows
       this.cols = cols
-      this.grid = new Array(this.rows * this.cols).fill(fill)
+      this.grid = data
     }
   }
 

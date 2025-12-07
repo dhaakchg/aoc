@@ -1,7 +1,7 @@
 const Grid = require("../util/grid");
 
 const makeGridFromInput = (input) => {
-  const inputLines = input.replaceAll('\r', '').split('\n').filter(line => line)
+  const inputLines = input.replaceAll('\r', '').split('\n').filter(Boolean)
   const operators = inputLines[inputLines.length - 1].match(/([*+]\s+)/g).map((op, i, a) => {
     return i !== a.length - 1 ? op.replace(/\s?$/, '') : op // don't trim the last one
   })

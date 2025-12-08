@@ -1,7 +1,6 @@
 const { splitClean } = require('../util/inputUtils')
 const Grid = require("../util/grid");
 const GridCoord = require("../util/gridCoord");
-const nextRowSplitter = require('../util/gridCoord')
 
 const SPLITTER_CHAR = '^'
 const START_CHAR = 'S'
@@ -17,10 +16,9 @@ const solve1 = (grid) => {
   let splitBeams = 0
   grid.set(findStart(grid), BEAM_CHAR)
   const splitters = splitterPositions(grid)
-  let beamPositions = []
 
   for(let row = 0; row < grid.rows - 1; row++) {
-    beamPositions = currentBeamPositions(grid, row)
+    const beamPositions = currentBeamPositions(grid, row)
     const nextRowSplitters = splitters.filter(splitter => splitter.row === row + 1)
     beamPositions.forEach((beamPosition) => {
       const beamSplitter = nextRowSplitters.find(splitter => splitter.col === beamPosition.col)
@@ -33,7 +31,6 @@ const solve1 = (grid) => {
       }
     })
   }
-
   return splitBeams
 }
 

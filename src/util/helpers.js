@@ -5,6 +5,8 @@ const Helpers = {
   gcd: (a, b) => b ? Helpers.gcd(b, a % b) : Math.abs(a),
   lcm: (a, b) => (a * b) / Helpers.gcd(a, b),
   manhattan: (coord1, coord2) => Math.abs(coord1.col - coord2.col) + Math.abs(coord1.row - coord2.row),
+  euclideanDistance2d: (pointA, pointB) => Math.sqrt((pointA.x - pointB.x) ** 2 + (pointA.y - pointB.y) ** 2),
+  euclideanDistance3d: (pointA, pointB) => Math.sqrt((pointA.x - pointB.x) ** 2 + (pointA.y - pointB.y) ** 2 + (pointA.z - pointB.z) ** 2),
   combinationN: function* combinationN(array, n) {
     if (n === 1) {
       for (const a of array) {

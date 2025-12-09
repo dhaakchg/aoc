@@ -34,7 +34,29 @@ const solve1 = (grid) => {
   return splitBeams
 }
 
+const solve2 = (grid) => {
+  // memoize shit
+  grid.set(findStart(grid), BEAM_CHAR)
+  const splitters = splitterPositions(grid)
+
+  for(let row = 0; row < grid.rows - 1; row++) {
+    const beamPositions = currentBeamPositions(grid, row)
+    const nextRowSplitters = splitters.filter(splitter => splitter.row === row + 1)
+    beamPositions.forEach((beamPosition) => {
+      const beamSplitter = nextRowSplitters.find(splitter => splitter.col === beamPosition.col)
+      if(beamSplitter) {
+        grid.set({ row: beamSplitter.row, col: beamPosition.col - 1 }, BEAM_CHAR)
+        grid.set({ row: beamSplitter.row, col: beamPosition.col + 1 }, BEAM_CHAR)
+        splitBeams++
+      } else {
+        grid.set({ row: beamPosition.row + 1, col: beamPosition.col }, BEAM_CHAR)
+      }
+    })
+  }
+  return splitBeams
+}
+
 module.exports = (input) => {
   const grid = new Grid({ data: splitClean(input) })
-  return { part1: solve1(grid), part2: 0 }
+  return { part1: solve1(grid), part2: solve2(grid) }
 }

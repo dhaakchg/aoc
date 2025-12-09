@@ -111,8 +111,46 @@ const solve1 = (jboxes, connectionLimit) => {
   }, 1)
 }
 
+const solve2 = (jboxes) => {
+  let circuits = jboxes.map(jbox => new Circuit([jbox]))
+  const shortestConnections = sortBoxPairsByDistance(jboxes)
+  let lastConnection = []
+  while(circuits.length > 1) {
+    const { boxA, boxB, distance } = shortestConnections.shift()
+    console.log(`${boxA} ${boxB} : distance=${distance.toFixed(2)}`)
+    let circuitAIdx = findBoxCircuit(circuits, boxA)
+    let circuitBIdx = findBoxCircuit(circuits, boxB)
+    if(circuitAIdx === -1 || circuitBIdx === -1) {
+      throw new Error('Could not find circuit for box')
+    }
+
+    // Why does making the connection here make this work. Explicitly says to not connect them if already in
+    // the same circuit but doing this below will never work.
+    boxA.connect(boxB)
+    boxB.connect(boxA)
+    lastConnection = [boxA, boxB]
+    console.log(`\tBoxA circuit idx: ${circuitAIdx}, BoxB circuit idx: ${circuitBIdx}`)
+    if(circuitAIdx !== circuitBIdx) {
+      // Boxes are not in the same circuit (and thus not connected yet), connect and add
+      // boxA.connect(boxB)
+      // boxB.connect(boxA)
+      // connectionsMade++
+      // Merge circuits
+      console.log(`\tAdded connection between ${boxA} and ${boxB}; merging circuits: ${circuits[circuitAIdx]} + ${circuits[circuitBIdx]}`)
+      circuits[circuitAIdx].addToCircuit(circuits[circuitBIdx].jboxes)
+      circuits.splice(circuitBIdx, 1)
+      circuits.sort((cA, cB) => cB.jboxes.length - cA.jboxes.length)
+      console.log(`\t${circuits.length} circuits remain after merge.`)
+    } else {
+      console.log(`\tSkipping connection between ${boxA} and ${boxB}; already connected in circuit: ${circuits[circuitAIdx]}`)
+    }
+  }
+  return lastConnection[0].x * lastConnection[1].x
+}
+
 module.exports = (input, limit = 1000) => {
   const jBoxes = parseCoords(input)
   const part1 = solve1(jBoxes, limit)
-  return { part1, part2: 0 }
+  const part2 = solve2(jBoxes)
+  return { part1, part2 }
 }

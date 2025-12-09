@@ -81,15 +81,22 @@ const solve1 = (jboxes, connectionLimit) => {
     if(circuitAIdx === -1 || circuitBIdx === -1) {
       throw new Error('Could not find circuit for box')
     }
+
+    // Why does making the connection here make this work. Explicitly says to not connect them if already in
+    // the same circuit but doing this below will never work.
+    boxA.connect(boxB)
+    boxB.connect(boxA)
+    connectionsMade++
+
     console.log(`\tBoxA circuit idx: ${circuitAIdx}, BoxB circuit idx: ${circuitBIdx}`)
-    if(circuitAIdx !== circuitBIdx && (!boxA.isConnectedTo(boxB) && !boxB.isConnectedTo(boxA))) {
+    if(circuitAIdx !== circuitBIdx) {
       // Boxes are not in the same circuit (and thus not connected yet), connect and add
-      boxA.connect(boxB)
-      boxB.connect(boxA)
-      connectionsMade++
+      // boxA.connect(boxB)
+      // boxB.connect(boxA)
+      // connectionsMade++
       // Merge circuits
       console.log(`\tAdded connection between ${boxA} and ${boxB}; merging circuits: ${circuits[circuitAIdx]} + ${circuits[circuitBIdx]}`)
-      circuits[circuitAIdx].addToCircuit([boxA, ...circuits[circuitAIdx].jboxes, ...circuits[circuitBIdx].jboxes])
+      circuits[circuitAIdx].addToCircuit(circuits[circuitBIdx].jboxes)
       circuits.splice(circuitBIdx, 1)
       circuits.sort((cA, cB) => cB.jboxes.length - cA.jboxes.length)
       console.log(`\t${circuits.length} circuits remain after merge.`)

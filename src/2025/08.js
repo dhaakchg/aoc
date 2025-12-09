@@ -23,7 +23,7 @@ class Circuit {
   }
 
   toString() {
-    return this.jboxes.map(jbox => jbox.toString()).join(' <-> ')
+    return this.jboxes.map(jbox => jbox.toString()).join(':')
   }
 }
 
@@ -32,38 +32,28 @@ class JBox {
     this.x = x
     this.y = y
     this.z = z
-    this.connections = []
+    this.connections = new Set()
   }
 
   connect(jbox) {
-    this.connections.push(jbox)
+    this.connections.add(jbox.toString())
   }
 
   isConnectedTo(jbox) {
-    return this.connections.some(conn =>
-      conn.x === jbox?.x &&
-      conn.y === jbox?.y &&
-      conn.z === jbox?.z
-    )
+    return this.connections.has(jbox.toString())
   }
 
   isConnected() {
-    return this.connections.length > 0
+    return this.connections.size > 0
   }
 
   toString() {
-    return `(x=${this.x},y=${this.y},z=${this.z})`
+    return `(${this.x},${this.y},${this.z})`
   }
 }
 
 const findBoxCircuit = (circuits, jbox) => {
-  return circuits.find(circuit => circuit.boxInCircuit(jbox))
-}
-
-const boxesInSameCircuit = (circuits, boxA, boxB) => {
-  const circuitA = findBoxCircuit(circuits, boxA)
-  const circuitB = findBoxCircuit(circuits, boxB)
-  return circuitA?.isEqual(circuitB)
+  return circuits.findIndex(circuit => circuit.boxInCircuit(jbox))
 }
 
 const parseCoords = (input) => {
@@ -79,48 +69,36 @@ const sortBoxPairsByDistance = (jboxes) => {
   }).toSorted((a, b) => a.distance - b.distance)
 }
 
-const findClosestUnconnectedBoxes = (jboxes, circuits) => {
-  let closestBoxes = []
-  let closestDistance = Infinity
-  for(let i = 0; i < jboxes.length; i++) {
-    const boxA = jboxes[i]
-    for(let j = 0; j < jboxes.length; j++) {
-      const boxB = jboxes[j]
-      if(boxesInSameCircuit(circuits, boxA, boxB) || boxA.isConnectedTo(boxB) || boxB.isConnectedTo(boxA)) continue
-      const distance = euclideanDistance3d(boxA, boxB)
-      if(distance !== 0 && distance < closestDistance) {
-        closestDistance = distance
-        closestBoxes = [boxA, boxB]
-      }
-    }
-  }
-  return closestBoxes
-}
-
 const solve1 = (jboxes, connectionLimit) => {
-  let circuits = []
+  let circuits = jboxes.map(jbox => new Circuit([jbox]))
   const shortestConnections = sortBoxPairsByDistance(jboxes)
   let connectionsMade = 0
   while(connectionsMade < connectionLimit) {
-    const { boxA, boxB } = shortestConnections.shift()
-    let circuitA = findBoxCircuit(circuits, boxA)
-    let circuitB = findBoxCircuit(circuits, boxB)
-    if(!circuitA?.isEqual(circuitB) && !boxA.isConnectedTo(boxB) && !boxB.isConnectedTo(boxA)) {
-      // Boxes are not in the same circuit, connect and add
+    const { boxA, boxB, distance } = shortestConnections.shift()
+    console.log(`${boxA} ${boxB} : distance=${distance.toFixed(2)}`)
+    let circuitAIdx = findBoxCircuit(circuits, boxA)
+    let circuitBIdx = findBoxCircuit(circuits, boxB)
+    if(circuitAIdx === -1 || circuitBIdx === -1) {
+      throw new Error('Could not find circuit for box')
+    }
+    console.log(`\tBoxA circuit idx: ${circuitAIdx}, BoxB circuit idx: ${circuitBIdx}`)
+    if(circuitAIdx !== circuitBIdx && (!boxA.isConnectedTo(boxB) && !boxB.isConnectedTo(boxA))) {
+      // Boxes are not in the same circuit (and thus not connected yet), connect and add
       boxA.connect(boxB)
       boxB.connect(boxA)
       connectionsMade++
-      if(circuitA) {
-        circuitA.addToCircuit([boxA, boxB])
-      } else if (circuitB) {
-        circuitB.addToCircuit([boxA, boxB])
-      } else if (boxA && boxB) {
-        circuits.push(new Circuit([boxA, boxB]))
-      }
+      // Merge circuits
+      console.log(`\tAdded connection between ${boxA} and ${boxB}; merging circuits: ${circuits[circuitAIdx]} + ${circuits[circuitBIdx]}`)
+      circuits[circuitAIdx].addToCircuit([boxA, ...circuits[circuitAIdx].jboxes, ...circuits[circuitBIdx].jboxes])
+      circuits.splice(circuitBIdx, 1)
+      circuits.sort((cA, cB) => cB.jboxes.length - cA.jboxes.length)
+      console.log(`\t${circuits.length} circuits remain after merge.`)
+    } else {
+      console.log(`\tSkipping connection between ${boxA} and ${boxB}; already connected in circuit: ${circuits[circuitAIdx]}`)
     }
   }
-
-  return circuits.toSorted((cA, cB) => cB.jboxes.length - cA.jboxes.length).slice(0, 3).reduce((acc, circuit) => {
+  circuits.sort((cA, cB) => cB.jboxes.length - cA.jboxes.length)
+  return circuits.slice(0, 3).reduce((acc, circuit) => {
     console.log(`${circuit}`)
     return acc * circuit.jboxes.length
   }, 1)

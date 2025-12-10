@@ -74,8 +74,7 @@ const solve1 = (jboxes, connectionLimit) => {
   const shortestConnections = sortBoxPairsByDistance(jboxes)
   let connectionsMade = 0
   while(connectionsMade < connectionLimit) {
-    const { boxA, boxB, distance } = shortestConnections.shift()
-    console.log(`${boxA} ${boxB} : distance=${distance.toFixed(2)}`)
+    const { boxA, boxB } = shortestConnections.shift()
     let circuitAIdx = findBoxCircuit(circuits, boxA)
     let circuitBIdx = findBoxCircuit(circuits, boxB)
     if(circuitAIdx === -1 || circuitBIdx === -1) {
@@ -88,25 +87,19 @@ const solve1 = (jboxes, connectionLimit) => {
     boxB.connect(boxA)
     connectionsMade++
 
-    console.log(`\tBoxA circuit idx: ${circuitAIdx}, BoxB circuit idx: ${circuitBIdx}`)
     if(circuitAIdx !== circuitBIdx) {
       // Boxes are not in the same circuit (and thus not connected yet), connect and add
       // boxA.connect(boxB)
       // boxB.connect(boxA)
       // connectionsMade++
       // Merge circuits
-      console.log(`\tAdded connection between ${boxA} and ${boxB}; merging circuits: ${circuits[circuitAIdx]} + ${circuits[circuitBIdx]}`)
       circuits[circuitAIdx].addToCircuit(circuits[circuitBIdx].jboxes)
       circuits.splice(circuitBIdx, 1)
       circuits.sort((cA, cB) => cB.jboxes.length - cA.jboxes.length)
-      console.log(`\t${circuits.length} circuits remain after merge.`)
-    } else {
-      console.log(`\tSkipping connection between ${boxA} and ${boxB}; already connected in circuit: ${circuits[circuitAIdx]}`)
     }
   }
   circuits.sort((cA, cB) => cB.jboxes.length - cA.jboxes.length)
   return circuits.slice(0, 3).reduce((acc, circuit) => {
-    console.log(`${circuit}`)
     return acc * circuit.jboxes.length
   }, 1)
 }
@@ -116,8 +109,7 @@ const solve2 = (jboxes) => {
   const shortestConnections = sortBoxPairsByDistance(jboxes)
   let lastConnection = []
   while(circuits.length > 1) {
-    const { boxA, boxB, distance } = shortestConnections.shift()
-    console.log(`${boxA} ${boxB} : distance=${distance.toFixed(2)}`)
+    const { boxA, boxB } = shortestConnections.shift()
     let circuitAIdx = findBoxCircuit(circuits, boxA)
     let circuitBIdx = findBoxCircuit(circuits, boxB)
     if(circuitAIdx === -1 || circuitBIdx === -1) {
@@ -129,20 +121,15 @@ const solve2 = (jboxes) => {
     boxA.connect(boxB)
     boxB.connect(boxA)
     lastConnection = [boxA, boxB]
-    console.log(`\tBoxA circuit idx: ${circuitAIdx}, BoxB circuit idx: ${circuitBIdx}`)
     if(circuitAIdx !== circuitBIdx) {
       // Boxes are not in the same circuit (and thus not connected yet), connect and add
       // boxA.connect(boxB)
       // boxB.connect(boxA)
       // connectionsMade++
       // Merge circuits
-      console.log(`\tAdded connection between ${boxA} and ${boxB}; merging circuits: ${circuits[circuitAIdx]} + ${circuits[circuitBIdx]}`)
       circuits[circuitAIdx].addToCircuit(circuits[circuitBIdx].jboxes)
       circuits.splice(circuitBIdx, 1)
       circuits.sort((cA, cB) => cB.jboxes.length - cA.jboxes.length)
-      console.log(`\t${circuits.length} circuits remain after merge.`)
-    } else {
-      console.log(`\tSkipping connection between ${boxA} and ${boxB}; already connected in circuit: ${circuits[circuitAIdx]}`)
     }
   }
   return lastConnection[0].x * lastConnection[1].x

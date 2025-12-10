@@ -35,28 +35,40 @@ const solve1 = (grid) => {
 }
 
 const solve2 = (grid) => {
-  // memoize shit
-  grid.set(findStart(grid), BEAM_CHAR)
+  const startCoord = findStart(grid)
+  grid.set(startCoord, BEAM_CHAR)
   const splitters = splitterPositions(grid)
-
+  const timelineCountMap = new Map()
+  timelineCountMap.set(`${startCoord.row},${startCoord.col}`, 1)
   for(let row = 0; row < grid.rows - 1; row++) {
     const beamPositions = currentBeamPositions(grid, row)
     const nextRowSplitters = splitters.filter(splitter => splitter.row === row + 1)
     beamPositions.forEach((beamPosition) => {
       const beamSplitter = nextRowSplitters.find(splitter => splitter.col === beamPosition.col)
+      const timelineCount = timelineCountMap.get(`${beamPosition.row},${beamPosition.col}`)
+      timelineCountMap.delete(`${beamPosition.row},${beamPosition.col}`) // clean up row
       if(beamSplitter) {
-        grid.set({ row: beamSplitter.row, col: beamPosition.col - 1 }, BEAM_CHAR)
-        grid.set({ row: beamSplitter.row, col: beamPosition.col + 1 }, BEAM_CHAR)
-        splitBeams++
+        const left = { row: beamSplitter.row, col: beamPosition.col - 1 }
+        const right = { row: beamSplitter.row, col: beamPosition.col + 1 }
+        grid.set(left, BEAM_CHAR)
+        grid.set(right, BEAM_CHAR)
+        const leftSplitCount = timelineCountMap.get(`${left.row},${left.col}`)
+        const rightSplitCount = timelineCountMap.get(`${right.row},${right.col}`)
+        timelineCountMap.set(`${left.row},${left.col}`, leftSplitCount ? leftSplitCount + timelineCount : timelineCount)
+        timelineCountMap.set(`${right.row},${right.col}`, rightSplitCount ? rightSplitCount + timelineCount : timelineCount)
       } else {
         grid.set({ row: beamPosition.row + 1, col: beamPosition.col }, BEAM_CHAR)
+        const nextpos = `${beamPosition.row + 1},${beamPosition.col}`
+        const nextposCount = timelineCountMap.get(nextpos)
+        timelineCountMap.set(nextpos, nextposCount ? nextposCount + timelineCount: timelineCount) // timelines remain same
       }
     })
   }
-  return splitBeams
+  return [...timelineCountMap.values()].reduce((a, v) => a + v, 0)
 }
 
 module.exports = (input) => {
-  const grid = new Grid({ data: splitClean(input) })
-  return { part1: solve1(grid), part2: solve2(grid) }
+  const grid1 = new Grid({ data: splitClean(input) })
+  const grid2 = new Grid({ data: splitClean(input) })
+  return { part1: solve1(grid1), part2: solve2(grid2) }
 }

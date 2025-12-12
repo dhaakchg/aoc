@@ -1,7 +1,6 @@
 const {splitClean} = require('../util/inputUtils')
-const Grid = require("../util/grid");
 const GridCoord = require("../util/gridCoord");
-const { combinationN, range } = require('../util/helpers')
+const { combinationN } = require('../util/helpers')
 
 const getTiles = (input) => {
   return splitClean(input).map(line => {
@@ -26,7 +25,7 @@ const getPolygonPerimeter = (redTiles) => {
   for(let i = 0; i < vertices.length - 1; i++) {
     const [start, end] = [vertices[i], vertices[i + 1]]
     const edge = getEdge(start, end)
-    if (edge[0].col === edge[edge.length - 1].col) {
+    if ('rows' in edge) {
       polygonEdges.vertical.push(edge)
     } else {
       polygonEdges.horizontal.push(edge)
@@ -40,15 +39,13 @@ const getEdge = (start, end) => {
   const { row: er, col: ec } = end
   // Draw vertical line
   if(sc === ec) {
-    // console.log(`Drawing vertical line from ${start} -> ${end}`)
-    const rowRange = sr <= er ? range(sr, er) : range(er, sr) // in case coordinates are backwards
-    return rowRange.map(r => new GridCoord(r, sc))
+    const rowRange = sr <= er ? { start: sr, end: er } : { start: er, end: sr } // in case coordinates are backwards
+    return { rows: rowRange, col: sc }
   }
   // Draw horizontal line
   if(sr === er) {
-    // console.log(`Drawing horizontal line from ${start} -> ${end}`)
-    const colRange = sc <= ec ? range(sc, ec) : range(ec, sc) // in case coordinates are backwards
-    return colRange.map(c => new GridCoord(sr, c))
+    const colRange = sc <= ec ? { start: sc, end: ec } : { start: ec, end: sc } // in case coordinates are backwards
+    return { cols: colRange, row: sr }
   }
 }
 
@@ -65,7 +62,8 @@ const getGridBounds = (redTiles) => {
 
 const pointOnEdge = (point, edges) => {
   return edges.find(edge => {
-    return edge.find(edgePoint => edgePoint.row === point.row && edgePoint.col === point.col) !== undefined
+    return ('col' in edge && point.col === edge.col && edge.rows.start <= point.row && point.row <= edge.rows.end) ||
+      ('row' in edge && point.row === edge.row && edge.cols.start <= point.col && point.col <= edge.cols.end)
   }) !== undefined
 }
 
@@ -81,15 +79,15 @@ const castRay = (point, edges, bounds) => {
     const pointOnVerticalEdge = pointOnEdge({ row, col }, edges.vertical)
     const nextPointOnHorizontalEdge = pointOnEdge({ row, col: col + 1 }, edges.horizontal)
     if(pointOnVerticalEdge && !onHorizontalEdge && nextPointOnHorizontalEdge) {
-      console.log(`Ray from (${point.row}, ${point.col}) intersected vertical edge onto horizontal at (${row}, ${col})`)
+      // console.log(`Ray from (${point.row}, ${point.col}) intersected vertical edge onto horizontal at (${row}, ${col})`)
       onHorizontalEdge = true
       intersections++
     } else if(pointOnVerticalEdge && onHorizontalEdge && !nextPointOnHorizontalEdge) {
       onHorizontalEdge = false
       intersections++
-      console.log(`Ray from (${point.row}, ${point.col}) intersected vertical edge off horizontal at (${row}, ${col})`)
+      // console.log(`Ray from (${point.row}, ${point.col}) intersected vertical edge off horizontal at (${row}, ${col})`)
     } else if(pointOnVerticalEdge && !onHorizontalEdge && !nextPointOnHorizontalEdge) {
-      console.log(`Ray from (${point.row}, ${point.col}) intersected pure vertical edge at (${row}, ${col})`)
+      // console.log(`Ray from (${point.row}, ${point.col}) intersected pure vertical edge at (${row}, ${col})`)
       intersections++
     }
   }
@@ -100,22 +98,38 @@ const castRay = (point, edges, bounds) => {
 }
 
 const solve2 = (redTiles) => {
-  const corners = [...combinationN(redTiles, 2)]
+  const redTileCombinations = [...combinationN(redTiles, 2)]
   const polygonEdges = getPolygonPerimeter(redTiles)
   const bounds = getGridBounds(redTiles)
-  const inside = [
-    new GridCoord(3, 8),
-    new GridCoord(4, 4),
-    new GridCoord(6, 10)
+  return Math.max(...redTileCombinations.filter((cornerPair, i) => {
+    const [coordA, coordB] = cornerPair
+    const rectCorners = getCornersOfRectangle(coordA, coordB)
+    console.log(`Checking combination ${i} of ${redTileCombinations.length} rectangle corners: ${rectCorners.map(c => `(${c.row}, ${c.col})`).join(', ')}`)
+    for(const corner of rectCorners) {
+      if(!castRay(corner, polygonEdges, bounds)) {
+        return false
+      }
+    }
+    return true
+  }).map((pair) => {
+    const [coordA, coordB] = pair
+    const dX = Math.abs(coordA.col - coordB.col) + 1
+    const dY = Math.abs(coordA.row - coordB.row) + 1
+    return dX * dY
+  }))
+}
+
+const getCornersOfRectangle = (coordA, coordB) => {
+  const minRow = Math.min(coordA.row, coordB.row)
+  const maxRow = Math.max(coordA.row, coordB.row)
+  const minCol = Math.min(coordA.col, coordB.col)
+  const maxCol = Math.max(coordA.col, coordB.col)
+  return [
+    new GridCoord(minRow, minCol),
+    new GridCoord(minRow, maxCol),
+    new GridCoord(maxRow, minCol),
+    new GridCoord(maxRow, maxCol),
   ]
-  const outside = [
-    ...range(0, 8).map(r => new GridCoord(r, 0)),
-    new GridCoord(2, 6),
-    new GridCoord(2, 12),
-  ]
-  console.log(inside.map(point => castRay(point, polygonEdges, bounds)))
-  console.log(outside.map(point => castRay(point, polygonEdges, bounds)))
-  return 0
 }
 
 module.exports = (input) => {

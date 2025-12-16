@@ -11,12 +11,13 @@ const getTiles = (input) => {
 
 const solve1 = (redTiles) => {
   const corners = [...combinationN(redTiles, 2)]
-  return corners.map(cornerPair => {
-    const [coordA, coordB] = cornerPair
-    const dX = Math.abs(coordA.col - coordB.col) + 1
-    const dY = Math.abs(coordA.row - coordB.row) + 1
-    return dX * dY
-  }).toSorted((a, b) => b - a)[0]
+  return corners.map(cornerPair => calcRectangleArea(...cornerPair)).toSorted((a, b) => b - a)[0]
+}
+
+const calcRectangleArea = (coordA, coordB) => {
+  const dX = Math.abs(coordA.col - coordB.col) + 1
+  const dY = Math.abs(coordA.row - coordB.row) + 1
+  return dX * dY
 }
 
 const getPolygonPerimeter = (redTiles) => {
@@ -97,26 +98,61 @@ const castRay = (point, edges, bounds) => {
   return false // outside
 }
 
+function edgeIntersectsRect(rectangle, edge) {
+  const { topLeft, topRight, bottomLeft, bottomRight } = rectangle
+  const leftEdge = getEdge(topLeft, bottomLeft)
+  const rightEdge = getEdge(topRight, bottomRight)
+  const topEdge = getEdge(topLeft, topRight)
+  const bottomEdge = getEdge(bottomLeft, bottomRight)
+
+  if('rows' in edge) {
+    // Vertical edge
+    const edgeCol = edge.col
+    const edgeRowStart = edge.rows.start
+    const edgeRowEnd = edge.rows.end
+    if(edgeCol <= leftEdge.col || edgeCol >= rightEdge.col) {
+      return false // line is outside rectangle X bounds
+    }
+    if(edgeRowEnd <= topEdge.row || edgeRowStart >= bottomEdge.row) {
+      return false // line is outside rectangle Y bounds
+    }
+  }
+  if('cols' in edge) {
+    // Horizontal edge
+    const edgeRow = edge.row
+    const edgeColStart = edge.cols.start
+    const edgeColEnd = edge.cols.end
+    if(edgeRow <= topEdge.row || edgeRow >= bottomEdge.row) {
+      return false // line is outside rectangle Y bounds
+    }
+    if(edgeColEnd <= leftEdge.col || edgeColStart >= rightEdge.col) {
+      return false // line is outside rectangle X bounds
+    }
+  }
+  return true;
+}
+
 const solve2 = (redTiles) => {
-  const redTileCombinations = [...combinationN(redTiles, 2)]
   const polygonEdges = getPolygonPerimeter(redTiles)
+  const rectanglesToCheck = []
+  for(const pair of combinationN(redTiles, 2)) {
+    const [coordA, coordB] = pair
+    const corners = getCornersOfRectangle(coordA, coordB)
+    const area = calcRectangleArea(coordA, coordB)
+    rectanglesToCheck.push({ corners, area })
+  }
+  rectanglesToCheck.sort((a, b) => b.area - a.area)
   const bounds = getGridBounds(redTiles)
-  return Math.max(...redTileCombinations.filter((cornerPair, i) => {
-    const [coordA, coordB] = cornerPair
-    const rectCorners = getCornersOfRectangle(coordA, coordB)
-    console.log(`Checking combination ${i} of ${redTileCombinations.length} rectangle corners: ${rectCorners.map(c => `(${c.row}, ${c.col})`).join(', ')}`)
-    for(const corner of rectCorners) {
-      if(!castRay(corner, polygonEdges, bounds)) {
+  return Math.max(...rectanglesToCheck.filter(({ corners, area }, i) => {
+    console.log(`Checking combination ${i} of ${rectanglesToCheck.length} rectangle corners: ${Object.values(corners).map(c => `(${c.row}, ${c.col})`).join(', ')} with area ${area}`)
+    for(const edge of [...polygonEdges.horizontal, ...polygonEdges.vertical]) {
+      if(edgeIntersectsRect(corners, edge)) {
+        console.log(`Polygon edge: ${JSON.stringify(edge)} intersects rectangle.`)
         return false
       }
     }
     return true
-  }).map((pair) => {
-    const [coordA, coordB] = pair
-    const dX = Math.abs(coordA.col - coordB.col) + 1
-    const dY = Math.abs(coordA.row - coordB.row) + 1
-    return dX * dY
-  }))
+  }).map(rectangle => rectangle.area))
 }
 
 const getCornersOfRectangle = (coordA, coordB) => {
@@ -124,12 +160,12 @@ const getCornersOfRectangle = (coordA, coordB) => {
   const maxRow = Math.max(coordA.row, coordB.row)
   const minCol = Math.min(coordA.col, coordB.col)
   const maxCol = Math.max(coordA.col, coordB.col)
-  return [
-    new GridCoord(minRow, minCol),
-    new GridCoord(minRow, maxCol),
-    new GridCoord(maxRow, minCol),
-    new GridCoord(maxRow, maxCol),
-  ]
+  return {
+    topLeft: new GridCoord(minRow, minCol),
+    topRight: new GridCoord(minRow, maxCol),
+    bottomLeft: new GridCoord(maxRow, minCol),
+    bottomRight: new GridCoord(maxRow, maxCol),
+  }
 }
 
 module.exports = (input) => {

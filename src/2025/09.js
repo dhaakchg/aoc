@@ -50,17 +50,6 @@ const getEdge = (start, end) => {
   }
 }
 
-const getGridBounds = (redTiles) => {
-  const rows = redTiles.map(tile => tile.row)
-  const cols = redTiles.map(tile => tile.col)
-  return {
-    minRow: Math.min(...rows) - 1,
-    maxRow: Math.max(...rows) + 1,
-    minCol: Math.min(...cols) - 1,
-    maxCol: Math.max(...cols) + 1,
-  }
-}
-
 const pointOnEdge = (point, edges) => {
   return edges.find(edge => {
     return ('col' in edge && point.col === edge.col && edge.rows.start <= point.row && point.row <= edge.rows.end) ||
@@ -142,12 +131,9 @@ const solve2 = (redTiles) => {
     rectanglesToCheck.push({ corners, area })
   }
   rectanglesToCheck.sort((a, b) => b.area - a.area)
-  const bounds = getGridBounds(redTiles)
-  return Math.max(...rectanglesToCheck.filter(({ corners, area }, i) => {
-    console.log(`Checking combination ${i} of ${rectanglesToCheck.length} rectangle corners: ${Object.values(corners).map(c => `(${c.row}, ${c.col})`).join(', ')} with area ${area}`)
+  return Math.max(...rectanglesToCheck.filter(({ corners }) => {
     for(const edge of [...polygonEdges.horizontal, ...polygonEdges.vertical]) {
       if(edgeIntersectsRect(corners, edge)) {
-        console.log(`Polygon edge: ${JSON.stringify(edge)} intersects rectangle.`)
         return false
       }
     }

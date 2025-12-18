@@ -16,46 +16,72 @@ class Machine {
       .map(b => {
         const a = new Array(lightsToStart.length).fill(0)
         b.forEach(i => { a[i] = 1 })
-        const buttonAsBits = a.join('')
-        console.log(`Button ${b} as bits: ${buttonAsBits} = ${Number.parseInt(a.join(''), 2)}`)
-        return buttonAsBits
+        return a.join('')
       })
     this.joltage = joltage.split(',').map(Number)
     this.lights = 0 // to be toggled by bitwise operations
-    console.log(`Parsed Machine - to start: ${this.lightsToStart}, buttons: ${JSON.stringify(this.buttons)}, joltage: ${this.joltage}`)
+    // console.log(`Parsed Machine - to start: ${this.lightsToStart}, buttons: ${JSON.stringify(this.buttons)}, joltage: ${this.joltage}`)
+  }
+
+  set(lightState) {
+    this.lights = lightState
   }
 
   toggleLight(button) {
     // Bitwise XOR to toggle lights
-    this.lights = this.lights ^ Number.parseInt(button, 2)
+    return this.lights ^ Number.parseInt(button, 2)
   }
 
-  lightsToString() {
-    return this.lights
+  lightToString(light) {
+    return light
       .toString(2)
       .padStart(this.lightsToStart.length, 0)
-      .replace(/0/g, '.')
-      .replace(/1/g, '#')
   }
 
-  isStarted() {
-    return this.lights === Number.parseInt(this.lightsToStart, 2)
+  isStarted(lights) {
+    return lights === Number.parseInt(this.lightsToStart, 2)
   }
+}
+
+function bfsClaudeDebug(machine) {
+  const queue = [];
+  const visited = new Set();
+  queue.push([0, 0]); // [lightState, presses]
+
+  while (queue.length > 0) {
+    const [seenLightState, presses] = queue.shift();
+    if (visited.has(seenLightState)) continue;
+    visited.add(seenLightState);
+
+    if (machine.isStarted(seenLightState)) {
+      console.log(`${seenLightState} started machine after ${presses} presses`);
+      return presses;
+    }
+
+    for (const button of machine.buttons) {
+      const newLightState = seenLightState ^ Number.parseInt(button, 2);
+      console.log(`Pressing button ${button} on lights ${seenLightState.toString(2).padStart(machine.lightsToStart.length, 0)} results in ${newLightState.toString(2).padStart(machine.lightsToStart.length, 0)}`);
+      if (!visited.has(newLightState)) {
+        queue.push([newLightState, presses + 1]);
+      }
+    }
+  }
+  return -1; // Not reachable
+}
+
+
+const solve1 = (machines) => {
+  return machines.reduce((acc, machine) => {
+    let buttonPresses = bfsClaudeDebug(machine)
+    console.log(`Machine solved in ${buttonPresses} button presses`)
+    return acc + buttonPresses
+  }, 0)
+
 }
 
 module.exports = (input) => {
   const machines = splitClean(input).map(line => new Machine(line))
-  console.log(`${machines.map(m => m.lights).join('\n')}`)
-  for(let b of machines[0].buttons) {
-    machines[0].toggleLight(b)
-    console.log(`Toggled button ${b}, lights now: ${machines[0].lightsToString()}`)
-    if(machines[0].isStarted()) {
-      console.log(`Machine started!`)
-      break
-    }
-  }
-
-  let part1 = 0
+  const part1 = solve1(machines)
   let part2 = 0
   return { part1, part2 }
 }
